@@ -6,20 +6,15 @@ use Firebase\JWT\Key;
 
 $page_name = "Dashboard";
 
-// JWT Checking in $_COOKIE
 if (!isset($_COOKIE["auth_token"])) {
     header("Location: /public/login");
     exit;
 }
 
-$jwt_secret_key = "webmaster"; // Ensure this matches the secret key used during encoding
 
 try {
-    // Decode and verify the token
     $decoded = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
-    // Token is valid, proceed to the dashboard
 } catch (Exception $e) {
-    // Token is invalid or expired
     header("Location: /public/login");
     exit;
 }
@@ -248,6 +243,7 @@ try {
                 </div>
             </div>
         </section>
+        <?php after_js()?>
         <?php include_once __DIR__ . "/../footer.php";?>
     </body>
 </html>

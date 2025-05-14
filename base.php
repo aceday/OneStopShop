@@ -7,6 +7,8 @@ $project_year_founded = 2025;
 $project_year_active = date('Y');
 $project_description = "The leading online shopping platform in Web Systeem Subject";
 
+$jwt_secret_key = "webmaster";
+$jwt_algorithm = "HS256";
 
 // DB Conn PDO
 // PDO
