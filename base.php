@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/vendor/autoload.php";
 
 $project_name = "One Stop Shop";
 $project_version = "1.0.0";

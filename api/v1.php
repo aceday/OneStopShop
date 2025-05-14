@@ -3,7 +3,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 require_once __DIR__ . "/../base.php";
-require_once __DIR__ . "/../vendor/autoload.php";
+
 use Firebase\JWT\JWT;
 $jwt_secret_key = "webmaster";
 $jwt_algorithm = "HS256";
@@ -60,6 +60,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     
                     $token = JWT::encode($token_dec, $jwt_secret_key, $jwt_algorithm);
 
+                    // Set cookie if remember me is checked
+                    if ($remember) {
+                        setcookie("auth_token", $token, time() + (60 * 60 * 24 * 30), "/"); // 30 days
+                    } else {
+                        setcookie("auth_token", $token, time() + (60 * 60 * 24), "/"); // 1 day
+                    }
                     echo json_encode(array(
                         "status" => "success",
                         "status_code" => 200,
@@ -211,6 +217,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         // Send reset password email soon :>
+    
+    } else if ($action == "logout") {
+        // Clear the cookie
+        if (isset($_COOKIE["auth_token"])) {
+            unset($_COOKIE["auth_token"]);
+            setcookie("auth_token", "", time() - 3600, "/"); // 1 hour ago
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "Logout successful"
+            ));
+            http_response_code(200);
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 401,
+                "message" => "Not logged in"
+            ));
+            http_response_code(401);
+        }
+        exit;
+    } else {
+        echo json_encode(array(
+            "status" => "error",
+            "status_code" => 400,
+            "message" => "Bad Request"
+        ));
+        http_response_code(400);
+        exit;
     }
 } else if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
