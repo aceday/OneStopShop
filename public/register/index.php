@@ -1,6 +1,6 @@
 <?php
 include __DIR__ . "/../../base.php";
-$page_name = "Login";
+$page_name = "Register";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +45,17 @@ $page_name = "Login";
                             </div>
                         </div>
 
-                        <div class="input-group mb-4">
+                        <div class="input-group mb-2">
+                            <div class="input-group-text">
+                                @
+                            </div>
+                            <div data-mdb-input-init class="form-floating">
+                                <input type="email" id="auth_email" class="form-control" placeholder="Email" />
+                                <label class="form-label" for="auth_email">Email</label>
+                            </div>
+                        </div>
+
+                        <div class="input-group mb-2">
                             <div class="input-group-text">
                                 @
                             </div>
@@ -55,22 +65,22 @@ $page_name = "Login";
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="form-check mb-0">
-                            <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
-                            <label class="form-check-label" for="form2Example3">
-                                Remember me
-                            </label>
+                        <div class="input-group mb-4">
+                            <div class="input-group-text">
+                                @
                             </div>
-                            <a href="#!" class="text-body">Forgot password?</a>
+                            <div data-mdb-input-init class="form-floating">
+                                <input type="password" id="auth_confirm_password" class="form-control" placeholder="Confirm Password" />
+                                <label class="form-label" for="auth_confirm_password">Confirm Password</label>
+                            </div>
                         </div>
 
                         <div class="text-center text-lg-start mt-4 pt-2">
-                            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
-                            style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
+                            <button  type="button" class="btn btn-success"
+                            style="padding-left: 2.5rem; padding-right: 2.5rem;">Register</button>
                             <p class="small fw-bold mt-2 pt-1 mb-0">
-                                Don't have an account?
-                                <a href="/public/register" class="link-danger">Register</a>
+                                Already have an account?
+                                <a href="/public/login"class="link-danger">Login</a>
                             </p>
                         </div>
 

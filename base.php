@@ -33,6 +33,8 @@ function head_js() {
 }
 
 function after_js() {
-
+    echo '
+        <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+    ';
 }
 
