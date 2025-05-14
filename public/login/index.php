@@ -31,16 +31,16 @@ $page_name = "Login";
                             <?php echo $page_name?>
                         </h2>    
                     </div>
-                    <form class="p-4">
-                        <div class="alert alert-info">
-                            Wait
+                    <form class="p-4" id="frmLogin">
+                        <div class="alert alert-info d-none" id = "frmLogin_alert">
+                            <span id="frmLogin_alert_message"></span>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-text">
                                 @
                             </div>
                             <div data-mdb-input-init class="form-floating">
-                                <input type="text" id="auth_username" class="form-control" placeholder="Username" />
+                                <input type="text" id="auth_username" name="auth_username" class="form-control" placeholder="Username" />
                                 <label class="form-label" for="auth_username">Username</label>
                             </div>
                         </div>
@@ -50,7 +50,7 @@ $page_name = "Login";
                                 @
                             </div>
                             <div data-mdb-input-init class="form-floating">
-                                <input type="password" id="auth_password" class="form-control" placeholder="Password" />
+                                <input type="password" id="auth_password" name="auth_password" class="form-control" placeholder="Password" />
                                 <label class="form-label" for="auth_password">Password</label>
                             </div>
                         </div>
@@ -66,7 +66,7 @@ $page_name = "Login";
                         </div>
 
                         <div class="text-center text-lg-start mt-4 pt-2">
-                            <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
+                            <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
                             style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
                             <p class="small fw-bold mt-2 pt-1 mb-0">
                                 Don't have an account?
@@ -81,4 +81,46 @@ $page_name = "Login";
         <?php include_once __DIR__ . "/../footer.php";?>
         <?php after_js(); ?>
     </body>
+    <script>
+        let frmLogin = document.getElementById("frmLogin");
+        let frmLogin_alert = document.getElementById("frmLogin_alert");
+        let frmLogin_alert_message = document.getElementById("frmLogin_alert_message");
+
+        frmLogin.addEventListener("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            let auth_username = formData.get("auth_username");
+            let auth_password = formData.get("auth_password");
+
+            $.ajax({
+                url: '/api/v1.php',
+                type: 'POST',
+                data: JSON.stringify({
+                    action: "login",
+                    username: auth_username,
+                    password: auth_password
+                }),
+                success: function(response) {
+                    console.log(response);
+                    frmLogin_alert.classList.remove("alert-info", "alert-danger");
+                    frmLogin_alert.classList.add("alert-success");
+                    frmLogin_alert.classList.remove("d-none");
+                    frmLogin_alert_message.innerHTML = response.message;
+                    // setTimeout(function() {
+                    //     window.location.href = "/public/dashboard";
+                    // }, 2000);
+                },
+                error: function(response) {
+                    console.log(response);
+                    frmLogin_alert.classList.remove("alert-info", "alert-success");
+                    frmLogin_alert.classList.add("alert-danger");
+                    frmLogin_alert.classList.remove("d-none");
+                    frmLogin_alert_message.innerHTML = response.responseJSON.message;
+                }
+            })
+            console.log(formData);
+        });
+
+    </script>
 </html>

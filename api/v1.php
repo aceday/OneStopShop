@@ -3,6 +3,10 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 require_once __DIR__ . "/../base.php";
+require_once __DIR__ . "/../vendor/autoload.php";
+use Firebase\JWT\JWT;
+$jwt_secret_key = "webmaster";
+$jwt_algorithm = "HS256";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $data = json_decode(file_get_contents("php://input"));
@@ -29,32 +33,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(401);
             exit;
         }
-
+        
         $username = $data->username;
         $password = $data->password;
         $remember = isset($data->remember) ? $data->remember : 0;
-
+        
         try {
             $cur = $pdo->prepare("SELECT * FROM users WHERE username = :username");
             $cur->execute(array(
-                    ":username" => $username
+                ":username" => $username
             ));
             $user = $cur->fetch(PDO::FETCH_ASSOC);
-
+            
             if ($user) {
                 $username = $user["username"];
                 $password_enc = $user["password"];
                 $user_id = $user["idUser"];
-
+                
                 if (password_verify($password, $password_enc)) {
                     $token_dec = array(
                         "user_id" => $user_id,
                         "username" => $username,
                         "iat" => time(),
-                        "exp" => time() + (60 * 60 * 24 * 30)
+                        "exp" => time() + (60 * 60 * 24 * 1) // 1 day
                     );
-
-                    $token = JWT::encode($token_dec, $jwt_secret_key);
+                    
+                    $token = JWT::encode($token_dec, $jwt_secret_key, $jwt_algorithm);
 
                     echo json_encode(array(
                         "status" => "success",
@@ -196,8 +200,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 http_response_code(404);
                 exit;
             }
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
 
-            // Send reset password email soon :>
+        // Send reset password email soon :>
     }
 } else if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
