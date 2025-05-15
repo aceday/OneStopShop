@@ -128,11 +128,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         try {
             // Check user existence
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username");
-            $stmt->execute(array(
+            $cur = $pdo->prepare("SELECT * FROM users WHERE username = :username");
+            $cur->execute(array(
                 ":username" => $username,
             ));
-            $user_check = $stmt->fetch(PDO::FETCH_ASSOC);
+            $user_check = $cur->fetch(PDO::FETCH_ASSOC);
             if ($user_check) {
                 echo json_encode(array(
                     "status" => "error",
@@ -143,8 +143,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 exit;
             }
 
-            $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)");
-            $stmt->execute(array(
+            $cur = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)");
+            $cur->execute(array(
                 ":username" => $username,
                 ":email" => $email,
                 ":password" => password_hash($password, PASSWORD_BCRYPT)
@@ -191,11 +191,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         try {
             // Check user existence
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
-            $stmt->execute(array(
+            $cur = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+            $cur->execute(array(
                 ":email" => $email,
             ));
-            $user_check = $stmt->fetch(PDO::FETCH_ASSOC);
+            $user_check = $cur->fetch(PDO::FETCH_ASSOC);
             if (!$user_check) {
                 echo json_encode(array(
                     "status" => "error",
@@ -251,7 +251,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         $category_name = $data->category_name;
-
+        $category_description = isset($data->category_description) ? $data->category_description : null;
+        
         if (empty($category_name)) {
             echo json_encode(array(
                 "status" => "error",
@@ -264,11 +265,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         try {
             // Check category existence
-            $stmt = $pdo->prepare("SELECT * FROM categories WHERE category_name = :category_name");
-            $stmt->execute(array(
+            $cur = $pdo->prepare("SELECT * FROM categories WHERE category_name = :category_name");
+            $cur->execute(array(
                 ":category_name" => $category_name,
             ));
-            $category_check = $stmt->fetch(PDO::FETCH_ASSOC);
+            $category_check = $cur->fetch(PDO::FETCH_ASSOC);
             if ($category_check) {
                 echo json_encode(array(
                     "status" => "error",
@@ -278,11 +279,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 http_response_code(409);
                 exit;
             }
-            $stmt = $pdo->prepare("INSERT INTO categories (category_name) VALUES (:category_name)");
-            $stmt->execute(array(
-                ":category_name" => $category_name
-            ));
 
+            $cur = $pdo->prepare("INSERT INTO categories (category_name, category_description) VALUES (:category_name, :category_description)");
+            $cur->execute(array(
+                ":category_name" => $category_name,
+                ":category_description" => $category_description
+            ));
             echo json_encode(array(
                 "status" => "success",
                 "status_code" => 201,
@@ -312,7 +314,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $idCategory = $data->idCategory;
         $category_name = $data->category_name;
-
+        $category_description = isset($data->category_description) ? $data->category_description : null;
+    
         if (empty($idCategory) || empty($category_name)) {
             echo json_encode(array(
                 "status" => "error",
@@ -325,11 +328,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         try {
             // Check category existence
-            $stmt = $pdo->prepare("SELECT * FROM categories WHERE idCategory = :idCategory");
-            $stmt->execute(array(
+            $cur = $pdo->prepare("SELECT * FROM categories WHERE idCategory = :idCategory");
+            $cur->execute(array(
                 ":idCategory" => $idCategory,
             ));
-            $category_check = $stmt->fetch(PDO::FETCH_ASSOC);
+            $category_check = $cur->fetch(PDO::FETCH_ASSOC);
             if (!$category_check) {
                 echo json_encode(array(
                     "status" => "error",
@@ -340,14 +343,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 exit;
             }
             
-            $stmt = $pdo->prepare("UPDATE categories SET category_name = :category_name WHERE idCategory = :idCategory");
-            $stmt->execute(array(
+            $cur = $pdo->prepare("UPDATE categories
+                                    SET category_name = :category_name, category_description = :category_description
+                                    WHERE idCategory = :idCategory");
+            $cur->execute(array(
                 ":category_name" => $category_name,
+                ":category_description" => $category_description,
                 ":idCategory" => $idCategory
             ));
 
             // Changes by afftected row
-            if ($stmt->rowCount() > 0) {
+            if ($cur->rowCount() > 0) {
                 echo json_encode(array(
                     "status" => "success",
                     "status_code" => 200,
