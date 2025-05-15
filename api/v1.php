@@ -502,6 +502,177 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(500);
             exit;
         }
+    } else if ($action == "product_update") {
+        if (
+            !isset($data->idProduct) ||
+            !isset($data->code) ||
+            !isset($data->name) || 
+            !isset($data->category) || 
+            !isset($data->price_now) || 
+            !isset($data->price_original) ||
+            !isset($data->description) ||
+            !isset($data->quantity)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please fill up for the following fields"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $idProduct = $data->idProduct;
+        $code = $data->code;
+        $name = $data->name;
+        $category = $data->category;
+        $price_now = $data->price_now;
+        $price_original = $data->price_original;
+        $description = isset($data->description) ? $data->description : null;
+        $quantity = $data->quantity;
+
+        if (
+            empty($idProduct) ||
+            empty($code) ||
+            empty($name) ||
+            empty($category) ||
+            empty($price_now) ||
+            empty($price_original) ||
+            empty($description) ||
+            empty($quantity)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please fill up for the following fields"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        try {
+            // Check product existence
+            $cur = $pdo->prepare("SELECT *
+                                FROM products
+                                WHERE idProduct = :idProduct");
+            $cur->execute(array(
+                ":idProduct" => $idProduct,
+            ));
+            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+            if (!$product_check) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 404,
+                    "message" => "Product not found"
+                ));
+                http_response_code(404);
+                exit;
+            }
+            
+            // Update product
+            $cur = $pdo->prepare("UPDATE products
+                                    SET product_code = :code, product_name = :name, product_category = :category, product_price_now = :price_now, product_price_original = :price_original, product_description = :description, product_quantity = :quantity
+                                    WHERE idProduct = :idProduct");
+            $cur->execute(array(
+                ":code" => $code,
+                ":name" => $name,
+                ":category" => $category,
+                ":price_now" => $price_now,
+                ":price_original" => $price_original,
+                ":description" => $description,
+                ":quantity" => $quantity,
+                ":idProduct" => $idProduct
+            ));
+            // Changes by afftected row
+            if ($cur->rowCount() > 0) {
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 200,
+                    "message" => "Product updated successfully"
+                ));
+                http_response_code(200);
+            } else {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 403,
+                    "message" => "No changes made"
+                ));
+                http_response_code(403);
+            }
+            exit;
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
+        exit;
+    } else if ($action == "product_delete") {
+        if (!isset($data->idProduct) && !isset($data->code)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input product id"
+            ));
+            http_response_code(400);
+        }
+
+        $idProduct = isset($data->idProduct) ? $data->idProduct : null;
+        $code = isset($data->code) ? $data->code : null;
+
+        try {
+            // Check product existence
+            $cur = $pdo->prepare("SELECT *
+                                FROM products
+                                WHERE idProduct = :idProduct OR product_code = :code");
+            $cur->execute(array(
+                ":idProduct" => $idProduct,
+                ":code" => $code
+            ));
+            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+            if (!$product_check) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 404,
+                    "message" => "Product not found"
+                ));
+                http_response_code(404);
+                exit;
+            }
+
+            // Delete product
+            $cur = $pdo->prepare("DELETE FROM products WHERE idProduct = :idProduct OR product_code = :code");
+            $cur->execute(array(
+                ":idProduct" => $idProduct,
+                ":code" => $code
+            ));
+            // Changes by afftected row
+            if ($cur->rowCount() > 0) {
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 200,
+                    "message" => "Product deleted successfully"
+                ));
+                http_response_code(200);
+            } else {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 403,
+                    "message" => "No changes made"
+                ));
+                http_response_code(403);
+            }
+
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
     }
     
     else {
@@ -599,7 +770,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
     } else if (isset($_GET['product'])) {
-        if (!isset($_GET['id'])) {
+        if (!isset($_GET['id']) && !isset($_GET['code']) && !isset($_GET['name'])) {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
@@ -622,8 +793,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $types .= "i";
         }
 
+        if (isset($_GET['code'])) {
+            $sql_cmd .= " AND product_code = :code";
+            $params[":code"] = $_GET['code'];
+            $types .= "s";
+        }
+
         // Product -> product_name
-        if (isset($_GET['product_name'])) {
+        if (isset($_GET['name'])) {
             $sql_cmd .= " AND product_name LIKE :product_name";
             $params[":product_name"] = "%" . $_GET['product_name'] . "%";
             $types .= "s";
