@@ -48,12 +48,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $username = $user["username"];
                 $password_enc = $user["password"];
                 $user_id = $user["idUser"];
-                $role_type = $user["role_type"];
+                
                 if (password_verify($password, $password_enc)) {
                     $token_dec = array(
                         "user_id" => $user_id,
                         "username" => $username,
-                        "role_type" => $role_type,
+                        "iat" => time(),
+                        "exp" => time() + (60 * 60 * 24 * 1) // 1 day
                     );
                     
                     $token = JWT::encode($token_dec, $jwt_secret_key, $jwt_algorithm);
@@ -236,7 +237,179 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(401);
         }
         exit;
-    } else {
+
+    // Category
+    } else if ($action == "category_create") {
+        if (!isset($data->category_name)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input category name"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $category_name = $data->category_name;
+
+        if (empty($category_name)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Category name cannot be empty"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        try {
+            // Check category existence
+            $stmt = $pdo->prepare("SELECT * FROM categories WHERE category_name = :category_name");
+            $stmt->execute(array(
+                ":category_name" => $category_name,
+            ));
+            $category_check = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($category_check) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "Category already exists"
+                ));
+                http_response_code(409);
+                exit;
+            }
+            $stmt = $pdo->prepare("INSERT INTO categories (category_name) VALUES (:category_name)");
+            $stmt->execute(array(
+                ":category_name" => $category_name
+            ));
+
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 201,
+                "message" => "Category created successfully"
+            ));
+            http_response_code(201);
+            exit;
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
+    } else if ($action == "category_update") {
+        if (!isset($data->idCategory) || !isset($data->category_name)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input category id and name"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $idCategory = $data->idCategory;
+        $category_name = $data->category_name;
+
+        if (empty($idCategory) || empty($category_name)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Category id and name cannot be empty"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        try {
+            // Check category existence
+            $stmt = $pdo->prepare("SELECT * FROM categories WHERE idCategory = :idCategory");
+            $stmt->execute(array(
+                ":idCategory" => $idCategory,
+            ));
+            $category_check = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$category_check) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 404,
+                    "message" => "Category not found"
+                ));
+                http_response_code(404);
+                exit;
+            }
+            
+            $stmt = $pdo->prepare("UPDATE categories SET category_name = :category_name WHERE idCategory = :idCategory");
+            $stmt->execute(array(
+                ":category_name" => $category_name,
+                ":idCategory" => $idCategory
+            ));
+
+            // Changes by afftected row
+            if ($stmt->rowCount() > 0) {
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 200,
+                    "message" => "Category updated successfully"
+                ));
+                http_response_code(200);
+            } else {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 403,
+                    "message" => "No changes made"
+                ));
+                http_response_code(403);
+            }
+            exit;
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
+    } else if ($action == "category_delete") {
+        if (!isset($data->idCategory)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input category id"
+            ));
+            http_response_code(400);
+        }
+
+        $sql_cmd = "DELETE FROM categories WHERE idCategory = :idCategory";
+
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idCategory", $data->idCategory);
+        $cur->execute();
+
+        if ($cur->rowCount() > 0) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "Category deleted successfully"
+            ));
+            http_response_code(200);
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "Category not found"
+            ));
+            http_response_code(404);
+            exit;
+        }
+    }
+    
+    
+    else {
         echo json_encode(array(
             "status" => "error",
             "status_code" => 400,
@@ -245,8 +418,92 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         http_response_code(400);
         exit;
     }
-} else if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
+} else if ($_SERVER["REQUEST_METHOD"] === "GET") {
+    if (isset($_GET['category'])) {
+        $sql_cmd = "SELECT *
+                    FROM categories
+                    WHERE 1=1";
+        $params = [];
+        $types = "";
+
+        // Category -> idCategory
+        if (isset($_GET['id'])) {   
+            $sql_cmd .= " AND idCategory = :idCategory";
+            $params[":idCategory"] = $_GET['id'];
+            $types .= "i";
+        }
+
+        // Category -> category_name
+        if (isset($_GET['category_name'])) {
+            $sql_cmd .= " AND category_name LIKE :category_name";
+            $params[":category_name"] = "%" . $_GET['category_name'] . "%";
+            $types .= "s";
+        }
+
+        // Category -> idCategory -> ASC / DESC
+        if (isset($_GET['sort_id'])) {
+            $sql_cmd .= " ORDER BY idCategory " . $_GET['sort'];
+        }
+
+        // Category -> category_name -> ASC / DESC
+        if (isset($_GET['sort_name'])) {
+            $sql_cmd .= " ORDER BY category_name " . $_GET['sort'];
+        }
+
+        // Category -> pagination
+        if (isset($_GET['page']) && isset($_GET['paginate'])) {
+            $page = $_GET['page'];
+            $paginate = $_GET['paginate'];
+            $offset = ($page - 1) * $paginate;
+            $sql_cmd .= " LIMIT :offset, :paginate";
+            $params[":offset"] = $offset;
+            $params[":paginate"] = $paginate;
+            $types .= "ii";
+        }
+
+        // Category -> total_categories
+        if (isset($_GET['total'])) {
+            $sql_cmd = "SELECT COUNT(*) as total_categories FROM categories";
+            $cur = $pdo->prepare($sql_cmd);
+            $cur->execute();
+            $total_categories = $cur->fetch(PDO::FETCH_ASSOC);
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "total_categories" => $total_categories
+            ));
+            http_response_code(200);
+            exit;
+        }
+
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        foreach ($params as $key => $value) {
+            $cur->bindValue($key, $value);
+        }
+        $cur->execute();
+        $total_categories = $cur->rowCount();
+        $categories = $cur->fetchAll(PDO::FETCH_ASSOC); // Use fetchAll for PDO
+        
+        if ($categories) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "categories" => $categories
+            ));
+            http_response_code(200);
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "No categories available"
+            ));
+            http_response_code(404);
+            exit;
+        }
+    }
 } else {
     echo json_encode(array(
         "status" => "error",

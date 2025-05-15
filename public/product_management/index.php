@@ -49,7 +49,7 @@ $role_type = $this_user->role_type;
             </div>
         </header>
 
-        <section class="py-5">
+        <section class="py-2">
             <div class="container px-4 px-lg-5 mt-5">
                 <div class="row">
                     <div class="col-6 mb-4">
