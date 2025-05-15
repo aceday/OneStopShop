@@ -412,8 +412,97 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(404);
             exit;
         }
+    } else if ($action == "product_create") {
+        if (
+            !isset($data->code) ||
+            !isset($data->name) || 
+            !isset($data->category) || 
+            !isset($data->price_now) || 
+            !isset($data->price_original) ||
+            !isset($data->description) ||
+            !isset($data->quantity)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please fill up for the following fields"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $code = $data->code;
+        $name = $data->name;
+        $category = $data->category;
+        $price_now = $data->price_now;
+        $price_original = $data->price_original;
+        $description = isset($data->description) ? $data->description : null;
+        $quantity = $data->quantity;
+        // $image = isset($data->image) ? $data->image : null;
+        // $status = isset($data->status) ? $data->status : null;
+
+        if (
+            empty($code) ||
+            empty($name) ||
+            empty($category) ||
+            empty($price_now) ||
+            empty($price_original) ||
+            empty($description) ||
+            empty($quantity)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please fill up for the following fields"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        try {
+            // Check product existence
+            $cur = $pdo->prepare("SELECT *
+                                FROM products
+                                WHERE product_code = :code");
+            $cur->execute(array(
+                ":code" => $code,
+            ));
+            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+            if ($product_check) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "Product already exists"
+                ));
+                http_response_code(409);
+                exit;
+            }
+            $cur = $pdo->prepare("INSERT INTO products (product_code, product_name, product_category, product_price_now, product_price_original, product_description, product_quantity)
+                                VALUES (:code, :name, :category, :price_now, :price_original, :description, :quantity)");
+            $cur->execute(array(
+                ":code" => $code,
+                ":name" => $name,
+                ":category" => $category,
+                ":price_now" => $price_now,
+                ":price_original" => $price_original,
+                ":description" => $description,
+                ":quantity" => $quantity
+            ));
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 201,
+                "message" => "Product created successfully"
+            ));
+            http_response_code(201);
+            exit;
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
     }
-    
     
     else {
         echo json_encode(array(
@@ -510,7 +599,104 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
     } else if (isset($_GET['product'])) {
-        
+        if (!isset($_GET['id'])) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input product id"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $sql_cmd = "SELECT *
+                    FROM products
+                    WHERE 1=1";
+        $params = [];
+        $types = "";
+
+        // Product -> idProduct
+        if (isset($_GET['id'])) {   
+            $sql_cmd .= " AND idProduct = :idProduct";
+            $params[":idProduct"] = $_GET['id'];
+            $types .= "i";
+        }
+
+        // Product -> product_name
+        if (isset($_GET['product_name'])) {
+            $sql_cmd .= " AND product_name LIKE :product_name";
+            $params[":product_name"] = "%" . $_GET['product_name'] . "%";
+            $types .= "s";
+        }
+
+        // Product -> category
+        if (isset($_GET['category'])) {
+            $sql_cmd .= " AND category = :category";
+            $params[":category"] = $_GET['category'];
+            $types .= "s";
+        }
+
+        // Product -> idProduct -> ASC / DESC
+        if (isset($_GET['sort_id'])) {
+            $sql_cmd .= " ORDER BY idProduct " . $_GET['sort'];
+        }
+
+        // Product -> product_name -> ASC / DESC
+        if (isset($_GET['sort_name'])) {
+            $sql_cmd .= " ORDER BY product_name " . $_GET['sort'];
+        }
+
+        // Product -> pagination
+        if (isset($_GET['page']) && isset($_GET['paginate'])) {
+            $page = $_GET['page'];
+            $paginate = $_GET['paginate'];
+            $offset = ($page - 1) * $paginate;
+            $sql_cmd .= " LIMIT :offset, :paginate";
+            $params[":offset"] = $offset;
+            $params[":paginate"] = $paginate;
+            $types .= "ii";
+        }
+
+        // Product -> total_products
+        if (isset($_GET['total'])) {
+            $sql_cmd = "SELECT COUNT(*) as total_products FROM products";
+            $cur = $pdo->prepare($sql_cmd);
+            $cur->execute();
+            $total_products = $cur->fetch(PDO::FETCH_ASSOC);
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "total_products" => $total_products
+            ));
+            http_response_code(200);
+            exit;
+        }
+
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        foreach ($params as $key => $value) {
+            $cur->bindValue($key, $value);
+        }
+        $cur->execute();
+        $total_products = $cur->rowCount();
+        $products = $cur->fetchAll(PDO::FETCH_ASSOC);
+        if ($products) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "products" => $products
+            ));
+            http_response_code(200);
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "No products available"
+            ));
+            http_response_code(404);
+            exit;
+        }
     }
 } else {
     echo json_encode(array(
