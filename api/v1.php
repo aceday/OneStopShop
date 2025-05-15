@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
 
-    } else if ($action == "register") {
+    } else if ($action == "register" || $action == "user_create") {
         if (!isset($data->username) || !isset($data->email) || !isset($data->password)) {
             echo json_encode(array(
                 "status" => "error",
@@ -673,9 +673,118 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(500);
             exit;
         }
-    }
-    
-    else {
+
+    // Users
+
+    /**
+     * user_create will merged at `register`
+     * 
+     */
+    } else if ($action == "user_update") {
+        if (!isset($data->idUser)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 403,
+                "message" => "User id is not present"
+            ));
+            http_response_code(403);
+            exit;
+        }
+
+        $id = $data->idUser;
+        $username = isset($data->username) ? $data->username : null;
+        $email = isset($data->email) ? $data->email : null;
+        $password = isset($data->password) ? $data->password : null;
+        $status = isset($data->status) ? $data->status : null;
+        $role_type = isset($data->role_type) ? $data->role_type : null;
+
+        if (empty($id)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "User id cannot be empty"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        try {
+            // Update User
+            $cur = $pdo->prepare("UPDATE users
+                                    SET username = :username, email = :email, password = :password, status = :status, role_type = :role_type
+                                    WHERE idUser = :idUser");
+            $cur->execute(array(
+                ":username" => $username,
+                ":email" => $email,
+                ":password" => password_hash($password, PASSWORD_BCRYPT),
+                ":status" => $status,
+                ":role_type" => $role_type,
+                ":idUser" => $id
+            ));
+            
+            // Check if any changes
+            if ($cur->rowCount() > 0) {
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 200,
+                    "message" => "User updated successfully"
+                ));
+                http_response_code(200);
+                exit;
+            } else {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 403,
+                    "message" => "No changes made"
+                ));
+                http_response_code(403);
+                exit;
+            }
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
+    } else if ($action == "user_delete") {
+        if (!isset($data->idUser)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input user id"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $sql_cmd = "DELETE FROM users WHERE idUser = :idUser";
+
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idUser", $data->idUser);
+        $cur->execute();
+
+        if ($cur->rowCount() > 0) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "User deleted successfully"
+            ));
+            http_response_code(200);
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "User not found"
+            ));
+            http_response_code(404);
+            exit;
+        }
+    } else {
         echo json_encode(array(
             "status" => "error",
             "status_code" => 400,
@@ -684,7 +793,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         http_response_code(400);
         exit;
     }
-
 } else if ($_SERVER["REQUEST_METHOD"] === "GET") {
     if (isset($_GET['category'])) {
         $sql_cmd = "SELECT *
@@ -870,6 +978,97 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "status" => "error",
                 "status_code" => 404,
                 "message" => "No products available"
+            ));
+            http_response_code(404);
+            exit;
+        }
+    } else if (isset($_GET['user'])) {
+        if (!isset($_GET['idUser']) && !isset($_GET['username']) && !isset($_GET['email'])) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input user id"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $sql_cmd = "SELECT idUser, username, email, status, role_type
+                    FROM users
+                    WHERE 1=1";
+        $params = [];
+        $types = "";
+
+        // User -> idUser
+        if (isset($_GET['idUser'])) {   
+            $sql_cmd .= " AND idUser = :idUser";
+            $params[":idUser"] = $_GET['idUser'];
+            $types .= "i";
+        }
+
+        // User -> username
+        if (isset($_GET['username'])) {
+            $sql_cmd .= " AND username LIKE :username";
+            $params[":username"] = "%" . $_GET['username'] . "%";
+            $types .= "s";
+        }
+
+        // User -> email
+        if (isset($_GET['email'])) {
+            $sql_cmd .= " AND email LIKE :email";
+            $params[":email"] = "%" . $_GET['email'] . "%";
+            $types .= "s";
+        }
+
+        // User -> idUser -> ASC / DESC
+        if (isset($_GET['sort_id'])) {
+            $sql_cmd .= " ORDER BY idUser " . $_GET['sort'];
+        }
+
+        // User -> username -> ASC / DESC
+        if (isset($_GET['sort_username'])) {
+            $sql_cmd .= " ORDER BY username " . $_GET['sort'];
+        }
+
+        // User -> pagination
+        if (isset($_GET['page']) && isset($_GET['paginate'])) {
+            $page = $_GET['page'];
+            $paginate = $_GET['paginate'];
+            $offset = ($page - 1) * $paginate;
+            $sql_cmd .= " LIMIT :offset, :paginate";
+            $params[":offset"] = $offset;
+            $params[":paginate"] = $paginate;
+            $types .= "ii";
+        }
+
+        // User -> total_users
+        if (isset($_GET['total'])) {
+            $sql_cmd = "SELECT COUNT(*) as total_users FROM users";
+            $cur = $pdo->prepare($sql_cmd);
+            $cur->execute();
+        }
+
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        foreach ($params as $key => $value) {
+            $cur->bindValue($key, $value);
+        }
+        $cur->execute();
+        $total_users = $cur->rowCount();
+        $users = $cur->fetchAll(PDO::FETCH_ASSOC);
+        if ($users) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "users" => $users
+            ));
+            http_response_code(200);
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "No users available"
             ));
             http_response_code(404);
             exit;
