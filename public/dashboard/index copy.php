@@ -13,19 +13,11 @@ if (!isset($_COOKIE["auth_token"])) {
 
 
 try {
-    $this_user = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
+    $decoded = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
 } catch (Exception $e) {
     header("Location: /public/login");
     exit;
 }
-
-$username = $this_user->username;
-$user_id = $this_user->user_id;
-$role_type = $this_user->role_type;
-
-echo json_encode($this_user);
-echo $role_type;
-// exit;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +37,6 @@ echo $role_type;
                 <div class="text-center text-white">
                     <h1 class="display-4 fw-bolder">Shop in style</h1>
                     <p class="lead fw-normal text-white-50 mb-0"><?php echo $project_description?></p>
-                    <?php echo $role_type?>
                 </div>
             </div>
         </header>

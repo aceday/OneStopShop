@@ -107,9 +107,9 @@ $page_name = "Login";
                     frmLogin_alert.classList.add("alert-success");
                     frmLogin_alert.classList.remove("d-none");
                     frmLogin_alert_message.innerHTML = response.message;
-                    // setTimeout(function() {
-                    //     window.location.href = "/public/dashboard";
-                    // }, 2000);
+                    setTimeout(function() {
+                        window.location.href = "/public/dashboard";
+                    }, 2000);
                 },
                 error: function(response) {
                     console.log(response);

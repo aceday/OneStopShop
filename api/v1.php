@@ -5,8 +5,7 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 require_once __DIR__ . "/../base.php";
 
 use Firebase\JWT\JWT;
-$jwt_secret_key = "webmaster";
-$jwt_algorithm = "HS256";
+
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $data = json_decode(file_get_contents("php://input"));
@@ -49,13 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $username = $user["username"];
                 $password_enc = $user["password"];
                 $user_id = $user["idUser"];
-                
+                $role_type = $user["role_type"];
                 if (password_verify($password, $password_enc)) {
                     $token_dec = array(
                         "user_id" => $user_id,
                         "username" => $username,
-                        "iat" => time(),
-                        "exp" => time() + (60 * 60 * 24 * 1) // 1 day
+                        "role_type" => $role_type,
                     );
                     
                     $token = JWT::encode($token_dec, $jwt_secret_key, $jwt_algorithm);
