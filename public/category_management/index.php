@@ -448,5 +448,45 @@ $role_type = $this_user->role_type;
                 }
             });
         });
+
+        let frmAddProduct = document.getElementById("frmAddProduct");
+        frmAddProduct.addEventListener("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            let add_product_name = formData.get("add_product_name");
+            let add_product_description = formData.get("add_product_description");
+            let add_product_category = formData.get("add_product_category");
+            let add_product_image = formData.get("add_product_image");
+            let add_product_price = formData.get("add_product_price");
+            let add_product_discount = formData.get("add_product_discount");
+            let add_product_quantity = formData.get("add_product_quantity");
+
+            // read the add_product_image
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                console.log(e.target.result);
+            }
+            reader.readAsDataURL(add_product_image);
+            console.log(add_product_name);
+            // console.log(add_product_image);
+            // return 0;
+            // $.ajax({
+            //     url: '/api/v1.php',
+            //     type: 'POST',
+            //     data: JSON.stringify({
+            //         action: "product_create",
+            //         product_name: add_product_name,
+            //         product_description: add_product_description,
+            //         product_price: add_product_price,
+            //         product_category: add_product_category
+            //     }),
+            //     success: function(response) {
+            //         console.log(response);
+            //     },
+            //     error: function(response) {
+            //         console.log(response);
+            //     }
+            // });
+        });
     </script>
 </html>

@@ -509,6 +509,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(404);
             exit;
         }
+    } else if (isset($_GET['product'])) {
+        
     }
 } else {
     echo json_encode(array(
