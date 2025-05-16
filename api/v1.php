@@ -48,11 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $username = $user["username"];
                 $password_enc = $user["password"];
                 $user_id = $user["idUser"];
-                
+                $role_type = $user["role_type"];
                 if (password_verify($password, $password_enc)) {
                     $token_dec = array(
                         "user_id" => $user_id,
                         "username" => $username,
+                        "role_type" => $role_type,
                         "iat" => time(),
                         "exp" => time() + (60 * 60 * 24 * 1) // 1 day
                     );
@@ -878,15 +879,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
     } else if (isset($_GET['product'])) {
-        if (!isset($_GET['id']) && !isset($_GET['code']) && !isset($_GET['name'])) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input product id"
-            ));
-            http_response_code(400);
-            exit;
-        }
+        // if (!isset($_GET['id']) && !isset($_GET['code']) && !isset($_GET['name'])) {
+        //     echo json_encode(array(
+        //         "status" => "error",
+        //         "status_code" => 400,
+        //         "message" => "Please input product id"
+        //     ));
+        //     http_response_code(400);
+        //     exit;
+        // }
 
         $sql_cmd = "SELECT *
                     FROM products
