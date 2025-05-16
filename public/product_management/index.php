@@ -15,13 +15,17 @@ if (!isset($_COOKIE["auth_token"])) {
 try {
     $this_user = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
 } catch (Exception $e) {
-    header("Location: /public/login");
-    exit;
+    // header("Location: /public/login");
+    // exit;
 }
 
 $username = $this_user->username;
 $user_id = $this_user->user_id;
 $role_type = $this_user->role_type;
+
+// else {
+//     header('Location /public/');
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -65,6 +69,19 @@ $role_type = $this_user->role_type;
                                 <i class="bi bi-plus"></i>
                                 Add Product
                             </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-100 px-4 py-2 mb-4">
+                    <div class="input-group">
+                        <div class="input-group-text">
+                            <span class="px-2">
+                                <i class="bi bi-search"></i>
+                            </span>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" id="product_search" class="form-control" placeholder="Search">
+                            <label for="product_search">Search</label>
                         </div>
                     </div>
                 </div>
@@ -363,7 +380,8 @@ $role_type = $this_user->role_type;
             <form method="POST" id="frmUpdateProduct">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
-                        <h5 class="modal-title fw-bold" id="UpdateProductTitle">Update Product</h5>
+                        <h5 class="modal-title fw-bold" id="UpdateProductTitle">Update Product: <span id="update_product_name_view"></span></h5>
+                        <input type="hidden" name="update_product_id" id="update_product_id">
                     </div>
                     <div class="modal-body py-4 px-6" id="UpdateProductBody">
                         <div class="mb-2">
@@ -374,21 +392,28 @@ $role_type = $this_user->role_type;
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="text" name="add_product_name" id="add_product_name" class="form-control" placeholder="Name" required>
-                                <label for="add_product_name">Name</label>
+                                <input type="text" name="update_product_name" id="update_product_name" class="form-control" placeholder="Name" required>
+                                <label for="update_product_name">Name</label>
                             </div>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <textarea name="add_product_description" id="add_product_description" class="form-control" placeholder="Description"></textarea>
-                                <label for="add_product_description">Description</label>
+                                <textarea name="update_product_code" id="update_product_code" class="form-control" placeholder="Description"></textarea>
+                                <label for="update_product_code">Product Code</label>
                             </div>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <select name="add_product_category" id="add_product_category" class="form-control">
+                                <textarea name="update_product_description" id="update_product_description" class="form-control" placeholder="Description"></textarea>
+                                <label for="update_product_description">Description</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <select name="update_product_category" id="update_product_category" class="form-control">
                                 </select>
                                 <label for="add_product_description">Category</label>
                             </div>
@@ -402,24 +427,24 @@ $role_type = $this_user->role_type;
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="add_product_price" id="add_product_price" class="form-control" placeholder="Price" required>
-                                <label for="add_product_price">Price</label>
+                                <input type="number" name="update_product_price" id="update_product_price" class="form-control" placeholder="Price" required>
+                                <label for="update_product_price">Price</label>
                             </div>
                         </div>
                         <!-- Discount Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="add_product_discount_price" id="add_product_discount_price" class="form-control" placeholder="Discount Price">
-                                <label for="add_product_discount_price">Discount Price</label>
+                                <input type="number" name="update_product_original_price" id="update_product_original_price" class="form-control" placeholder="Discount Price">
+                                <label for="update_product_original_price">Original Price</label>
                             </div>
                         </div>
                         <!-- Stock -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="add_product_stock" id="add_product_stock" class="form-control" placeholder="Stock" required>
-                                <label for="add_product_stock">Stock</label>
+                                <input type="number" name="update_product_stock" id="update_product_stock" class="form-control" placeholder="Stock" required>
+                                <label for="update_product_stock">Stock</label>
                             </div>
                         </div>
                         <div class="modal-footer" id="AddProductFooter">
@@ -513,9 +538,47 @@ $role_type = $this_user->role_type;
         </div>
     </div>
 
+    <!-- Delete Category -->
+    <div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+        <div class="modal-dialog" role="document">
+            <form method="POST" id="frmdeleteProduct">
+                <div class="modal-content">
+                    <div class="modal-header bg-orange-custom d-flex justify-content-start">
+                        <h5 class="modal-title fw-bold" id="deleteCategoryTitle">
+                            Delete Category: <span id="delete_product_name_view"></span>
+                        </h5>
+                    </div>
+                    <div class="modal-body p-4 px-6" id="deleteCategoryBody">
+                        <div class="mb-4">
+                            <div class="mb-2">
+                                <div class="alert alert-danger w-100 d-none" id="deleteProductAlert">
+                                    <span id="deleteProductAlertMsg"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16" style="color:red">
+                                    <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
+                                    <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                                </svg>
+                            </div>
+                            <input type="hidden" name="delete_product_id" id="delete_product_id">
+                            <label class="form-label">
+                                Do you want to delete this product <strong><span id="delete_product_name"></span></strong>?
+                            </label>
+                        </div>
+                        <div class="modal-footer" id="deleteCategoryFooter">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger" id="btndeleteCategory">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
-
         var page = 1;
         var paginate = 20;
         var search_name = "";
@@ -524,28 +587,59 @@ $role_type = $this_user->role_type;
 
         let products_list = document.getElementById("products_list");
 
+        function fetchCategories() {
+            let params = new URLSearchParams({
+                category: true
+            })
+            $.ajax({
+                url: "/api/v1.php?" + params,
+                type: "GET",
+                success: function(response) {
+                    let categories = response.categories;
+                    categories.forEach(function(category) {
+                        // Update Product
+                        let add_product_category = document.getElementById("add_product_category");
+                        let option = document.createElement("option");
+                        option.value = category.idCategory;
+                        option.text = category.category_name;
+                        add_product_category.appendChild(option);
 
+                        // Update Product
+                        let update_product_category = document.getElementById("update_product_category");
+                        let option2 = document.createElement("option");
+                        option2.value = category.idCategory;
+                        option2.text = category.category_name;
+                        update_product_category.appendChild(option2);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching categories:", error);
+                }
+            });
+        }
+        fetchCategories();
+
+        let product_search = document.getElementById("product_search");
+        product_search.addEventListener("keyup", function (e) {
+            e.preventDefault();
+            console.log(this.value);
+            search_name = this.value;
+            fetchProducts();
+        });
 
         function fetchProducts() {
             let params = new URLSearchParams({
                 product: true, 
                 page: page,
-                paginate: paginate          
+                paginate: paginate,
+                name: search_name      
             })
-            if (search_name.length > 0) {
-                params.append("name", search_name);
-            }
-            if (search_category.length > 0) {
-                params.append("category", search_category);
-            }
-            if (search_code.length > 0) {
-                params.append("code", search_code);
-            }
             console.log(params.toString());
             $.ajax({
                 url: "/api/v1.php?" + params,
                 type: "GET",
                 success: function(response) {
+                    console.log(response);
                     products_list.innerHTML = "";
                     let products = response.products;
                     products.forEach(product => {
@@ -553,6 +647,12 @@ $role_type = $this_user->role_type;
                         let product_name = product.product_name;
                         let product_price_now = product.product_price_now;
                         let product_price_original = product.product_price_original;
+
+                        console.log(product_price_now, product_price_original, product_price_now > product_price_original);
+                        // Product infos
+                        let product_view_original = product_price_now > product_price_original
+                            ? `<span class=\"text-muted text-decoration-line-through\">₱${product_price_original}</span>`
+                            : ``;
                         products_list.innerHTML += `
                             <div class="col mb-5">
                                 <div class="card h-100">
@@ -564,26 +664,33 @@ $role_type = $this_user->role_type;
                                     <div class="card-body p-4">
                                         <div class="text-center">
                                             <!-- Product name-->
-                                            <h5 class="fw-bolder">${product_name}</h5>
-                                            <!-- Product price-->
-                                            <span class="text-muted text-decoration-line-through">₱${product_price_original}</span>
+                                            <h5 class="fw-bolder">${product_name}</h5>                                            <!-- Product price-->
+                                            ${product_view_original}
                                             ₱${product_price_now}
                                         </div>
                                     </div>
                                     <!-- Product actions-->
                                     <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                        <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Add to cart</a></div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" id="product-update-${product_id}" data-bs-toggle="modal" data-bs-target="#updateProductModal">Update</a></div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-center"><a class="btn btn-outline-danger mt-auto" id="product-delete-${product_id}" data-bs-toggle="modal" data-bs-target="#deleteProductModal">Delete</a></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         `;
                     });
                 },
-                error: function(xhr, status, error) {
-                    console.error("Error fetching categories:", error);
+                error: function(response) {
+                    console.log(response);
                 }
             });
         }
+    
         fetchProducts();
 
         let frmAddProduct = document.getElementById("frmAddProduct");
@@ -616,8 +723,6 @@ $role_type = $this_user->role_type;
             console.log('Price: ', add_product_price);
             console.log('Original Price: ', add_product_original_price);
             console.log('Quantity: ', add_product_quantity);
-
-
 
             $.ajax({
                 url: '/api/v1.php',
@@ -660,6 +765,7 @@ $role_type = $this_user->role_type;
         frmUpdateProduct.addEventListener("submit", function(e) {
             e.preventDefault();
             let formData = new FormData(this);
+            let update_product_id = formData.get("update_product_id");
             let update_product_name = formData.get("update_product_name");
             let update_product_code = formData.get("update_product_code");
             let update_product_description = formData.get("update_product_description");
@@ -669,11 +775,22 @@ $role_type = $this_user->role_type;
             let update_product_original_price = formData.get("update_product_original_price");
             let update_product_quantity = formData.get("update_product_stock");
 
+            console.log("ID: ", update_product_id);
+            console.log('Code: ', update_product_code);
+            console.log('Name: ', update_product_name);
+            console.log('Description: ', update_product_description);
+            console.log('Category: ', update_product_category);
+            // console.log('Image: ', update_product_image);
+            console.log('Price: ', update_product_price);
+            console.log('Original Price: ', update_product_original_price);
+            console.log('Quantity: ', update_product_quantity);
+
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
                 data: JSON.stringify({
                     action: "product_update",
+                    id: update_product_id,
                     code: update_product_code,
                     name: update_product_name,
                     description: update_product_description,
@@ -698,6 +815,119 @@ $role_type = $this_user->role_type;
                     console.log(response.responseJSON);
                     let alert = document.getElementById("UpdateProductAlert");
                     let alertMsg = document.getElementById("UpdateProductAlertMsg");
+                    alertMsg.innerHTML = response.responseJSON.message;
+                    alert.classList.remove("alert-success", "alert-info");
+                    alert.classList.add("alert-danger");
+                    alert.classList.remove("d-none");
+                }
+            });
+        });
+
+        // Update Loader
+        $(document).on('click', '[id^="product-update-"]', function (e) {
+            e.preventDefault();
+            const update_idProduct = this.id.split("-")[2];
+            console.log(update_idProduct);
+            let params = new URLSearchParams({
+                product: true,
+                id: update_idProduct
+            });
+            $.ajax({
+                url: '/api/v1.php?' + params,
+                type: 'GET',
+                success: function(response) {
+                    // console.log(response);
+                    let product = response.products[0];
+
+                    const product_id = product.idProduct;
+                    const product_name = product.product_name;
+                    const product_code = product.product_code;
+                    const product_category = product.product_category;
+                    const product_description = product.product_description;
+                    const product_price_now = product.product_price_now;
+                    const product_price_original = product.product_price_original;
+                    const product_stock = product.product_quantity;
+                    const product_status = product.product_status;
+
+                    let frmUpdateProduct = document.getElementById("frmUpdateProduct");
+                    frmUpdateProduct.reset();
+
+                    frmUpdateProduct.elements['update_product_id'].value = product_id;
+                    document.getElementById('update_product_name_view').textContent = product_name;
+                    frmUpdateProduct.elements['update_product_name'].value = product_name;
+                    frmUpdateProduct.elements['update_product_code'].value = product_code;
+                    frmUpdateProduct.elements['update_product_description'].value = product_description;
+                    frmUpdateProduct.elements['update_product_category'].value = product_category;
+                    frmUpdateProduct.elements['update_product_price'].value = product_price_now;
+                    frmUpdateProduct.elements['update_product_original_price'].value = product_price_original;
+                    frmUpdateProduct.elements['update_product_stock'].value = product_stock;
+                    frmUpdateProduct.elements['update_product_status'].value = product_status;
+
+                    console.log(product);
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        });
+
+        $(document).on('click', '[id^="product-delete-"]', function (e) {
+            e.preventDefault();
+            const delete_idProduct = this.id.split("-")[2];
+            console.log(delete_idProduct);
+            let params = new URLSearchParams({
+                product: true,
+                id: delete_idProduct
+            });
+            $.ajax({
+                url: '/api/v1.php?' + params,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    let product = response.products[0];
+
+                    const product_id = product.idProduct;
+                    const product_name = product.product_name;
+                    document.getElementById('delete_product_name_view').textContent = product_name;
+                    document.getElementById('delete_product_name').textContent = product_name;
+                    document.getElementById('delete_product_id').value = product_id;
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        });
+
+        let frmdeleteProduct = document.getElementById("frmdeleteProduct");
+        frmdeleteProduct.addEventListener("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            let delete_product_id = formData.get("delete_product_id");
+
+            console.log("ID: ", delete_product_id);
+
+            $.ajax({
+                url: '/api/v1.php',
+                type: 'POST',
+                data: JSON.stringify({
+                    action: "product_delete",
+                    id: delete_product_id
+                }),
+                success: function(response) {
+                    let deleteProductAlertMsg = document.getElementById("deleteProductAlertMsg");
+                    let deleteProductAlert = document.getElementById("deleteProductAlert");
+                    deleteProductAlertMsg.textContent = response.message;
+                    deleteProductAlert.classList.remove("alert-danger", "alert-info");
+                    deleteProductAlert.classList.add("alert-success");
+                    deleteProductAlert.classList.remove("d-none");
+                    setTimeout(()=>{
+                        location.reload();
+                    }, 2000);
+                },  
+                error: function(response) {
+                    console.log(response.responseJSON);
+                    let alert = document.getElementById("deleteProductAlert");
+                    let alertMsg = document.getElementById("deleteProductAlertMsg");
                     alertMsg.innerHTML = response.responseJSON.message;
                     alert.classList.remove("alert-success", "alert-info");
                     alert.classList.add("alert-danger");

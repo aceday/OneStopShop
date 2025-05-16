@@ -393,7 +393,7 @@ $role_type = $this_user->role_type;
                 console.log(e.target.result);
             }
             reader.readAsDataURL(add_product_image);
-            // console.log(add_product_name);
+            console.log(add_product_name);
             // console.log(add_product_image);
             // return 0;
             // $.ajax({

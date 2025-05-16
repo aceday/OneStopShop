@@ -505,7 +505,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     } else if ($action == "product_update") {
         if (
-            !isset($data->idProduct) ||
+            !isset($data->id) ||
             !isset($data->code) ||
             !isset($data->name) || 
             !isset($data->category) || 
@@ -522,7 +522,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
 
-        $idProduct = $data->idProduct;
+        $idProduct = $data->id;
         $code = $data->code;
         $name = $data->name;
         $category = $data->category;
@@ -610,7 +610,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         exit;
     } else if ($action == "product_delete") {
-        if (!isset($data->idProduct) && !isset($data->code)) {
+        if (!isset($data->id) && !isset($data->code)) {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
@@ -619,7 +619,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(400);
         }
 
-        $idProduct = isset($data->idProduct) ? $data->idProduct : null;
+        $idProduct = isset($data->id) ? $data->id : null;
         $code = isset($data->code) ? $data->code : null;
 
         try {
@@ -910,8 +910,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // Product -> product_name
         if (isset($_GET['name'])) {
-            $sql_cmd .= " AND product_name LIKE :product_name";
-            $params[":product_name"] = "%" . $_GET['product_name'] . "%";
+            $sql_cmd .= " AND product_name LIKE CONCAT(:product_name)";
+            $params[":product_name"] = "%" . $_GET['name'] . "%";
             $types .= "s";
         }
 

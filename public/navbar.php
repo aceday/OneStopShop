@@ -41,6 +41,7 @@
                             <?php endif;?>
                             <?php if (isset($_COOKIE['auth_token']) && $role_type == "admin"):?>
                             <li><a class="dropdown-item" href="/public/product_management">Product Managment</a></li>
+                            <li><a class="dropdown-item" href="/public/category_management">Category Managment</a></li>
                             <?php endif;?>
                             <li><a class="dropdown-item" href="#!">Settings</a></li>
                             <li><hr class="dropdown-divider" /></li>
