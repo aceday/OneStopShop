@@ -272,8 +272,93 @@ $role_type = $this_user->role_type;
         <?php include_once __DIR__ . "/../footer.php";?>
     </body>
 
-        <!-- Add Category -->
-        <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+    <!-- Add Product -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+        <div class="modal-dialog" role="document">
+            <form method="POST" id="frmAddProduct">
+                <div class="modal-content">
+                    <div class="modal-header bg-orange-custom d-flex justify-content-start">
+                        <h5 class="modal-title fw-bold" id="AddProductTitle">Add Product</h5>
+                    </div>
+                    <div class="modal-body py-4 px-6" id="AddProductBody">
+                        <div class="mb-2">
+                            <div class="alert alert-danger w-100 d-none" id="AddProductAlert">
+                                <span id="AddProductAlertMsg"></span>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="text" name="add_product_name" id="add_product_name" class="form-control" placeholder="Name" required>
+                                <label for="add_product_name">Name</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="text" name="add_product_code" id="add_product_code" class="form-control" placeholder="Product Code" required>
+                                <label for="add_product_code">Prodct Code</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <textarea name="add_product_description" id="add_product_description" class="form-control" placeholder="Description"></textarea>
+                                <label for="add_product_description">Description</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <select name="add_product_category" id="add_product_category" class="form-control">
+                                </select>
+                                <label for="add_product_description">Category</label>
+                            </div>
+                        </div>
+                        <!-- Add file image -->
+                        <div class="mb-2">
+                            <label for="add_product_image">Product Images</label>
+                            <input type="file" name="add_product_image" id="add_product_image" class="form-control" placeholder="Image" required multiple>
+                        </div>
+                        <!-- Price -->
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="number" name="add_product_price" id="add_product_price" class="form-control" placeholder="Price" required>
+                                <label for="add_product_price">Price</label>
+                            </div>
+                        </div>
+                        <!-- Discount Price -->
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="number" name="add_product_original_price" id="add_product_original_price" class="form-control" placeholder="Discount Price">
+                                <label for="add_product_original_price">Original Price</label>
+                            </div>
+                        </div>
+                        <!-- Stock -->
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="number" name="add_product_stock" id="add_product_stock" class="form-control" placeholder="Stock" required>
+                                <label for="add_product_stock">Stock</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer" id="AddProductFooter">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success" id="btnAddProduct">
+                                <i class="bi bi-floppy-fill"></i>
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Product -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmAddProduct">
                 <div class="modal-content">
@@ -349,6 +434,85 @@ $role_type = $this_user->role_type;
             </form>
         </div>
     </div>
+    
+        <!-- Add Product -->
+        <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+        <div class="modal-dialog" role="document">
+            <form method="POST" id="frmUpdateProduct">
+                <div class="modal-content">
+                    <div class="modal-header bg-orange-custom d-flex justify-content-start">
+                        <h5 class="modal-title fw-bold" id="AddProductTitle">Update Product</h5>
+                    </div>
+                    <div class="modal-body py-4 px-6" id="AddProductBody">
+                        <div class="mb-2">
+                            <div class="alert alert-danger w-100 d-none" id="UpdateProductAlert">
+                                <span id="UpdateProductAlertMsg"></span>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="text" name="update_product_name" id="update_product_name" class="form-control" placeholder="Name" required>
+                                <label for="update_product_name">Name</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <textarea name="update_product_description" id="update_product_description" class="form-control" placeholder="Description"></textarea>
+                                <label for="update_product_description">Description</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <select name="update_product_category" id="update_product_category" class="form-control">
+                                </select>
+                                <label for="update_product_description">Category</label>
+                            </div>
+                        </div>
+                        <!-- Add file image -->
+                        <div class="mb-2">
+                            <label for="update_product_image">Product Images</label>
+                            <input type="file" name="update_product_image" id="update_product_image" class="form-control" placeholder="Image" required multiple>
+                        </div>
+                        <!-- Price -->
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="number" name="update_product_price" id="update_product_price" class="form-control" placeholder="Price" required>
+                                <label for="update_product_price">Price</label>
+                            </div>
+                        </div>
+                        <!-- Discount Price -->
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="number" name="update_product_discount_price" id="update_product_discount_price" class="form-control" placeholder="Discount Price">
+                                <label for="update_product_discount_price">Discount Price</label>
+                            </div>
+                        </div>
+                        <!-- Stock -->
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="number" name="update_product_stock" id="update_product_stock" class="form-control" placeholder="Stock" required>
+                                <label for="update_product_stock">Stock</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer" id="AddProductFooter">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="btnAddProduct">
+                                <i class="bi bi-floppy-fill"></i>
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script>
         function fetchCategories() {
@@ -380,39 +544,69 @@ $role_type = $this_user->role_type;
             e.preventDefault();
             let formData = new FormData(this);
             let add_product_name = formData.get("add_product_name");
+            let add_product_code = formData.get("add_product_code");
             let add_product_description = formData.get("add_product_description");
             let add_product_category = formData.get("add_product_category");
             let add_product_image = formData.get("add_product_image");
             let add_product_price = formData.get("add_product_price");
-            let add_product_discount = formData.get("add_product_discount");
-            let add_product_quantity = formData.get("add_product_quantity");
+            let add_product_original_price = formData.get("add_product_original_price");
+            let add_product_quantity = formData.get("add_product_stock");
 
             // read the add_product_image
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                console.log(e.target.result);
-            }
-            reader.readAsDataURL(add_product_image);
-            console.log(add_product_name);
+            // let reader = new FileReader();
+            // reader.onload = function(e) {
+            //     console.log(e.target.result);
+            // }
+            // reader.readAsDataURL(add_product_image);
+            // console.log(add_product_name);
             // console.log(add_product_image);
             // return 0;
-            // $.ajax({
-            //     url: '/api/v1.php',
-            //     type: 'POST',
-            //     data: JSON.stringify({
-            //         action: "product_create",
-            //         product_name: add_product_name,
-            //         product_description: add_product_description,
-            //         product_price: add_product_price,
-            //         product_category: add_product_category
-            //     }),
-            //     success: function(response) {
-            //         console.log(response);
-            //     },
-            //     error: function(response) {
-            //         console.log(response);
-            //     }
-            // });
+            console.log('Code: ', add_product_code);
+            console.log('Name: ', add_product_name);
+            console.log('Description: ', add_product_description);
+            console.log('Category: ', add_product_category);
+            // console.log('Image: ', add_product_image);
+            console.log('Price: ', add_product_price);
+            console.log('Original Price: ', add_product_original_price);
+            console.log('Quantity: ', add_product_quantity);
+
+
+
+            $.ajax({
+                url: '/api/v1.php',
+                type: 'POST',
+                data: JSON.stringify({
+                    action: "product_create",
+                    code: add_product_code,
+                    name: add_product_name,
+                    description: add_product_description,
+                    category: add_product_category,
+                    // add_product_image: add_product_image,
+                    price_now: add_product_price,
+                    price_original: add_product_original_price,
+                    quantity: add_product_quantity
+                }),
+                success: function(response) {
+                    let AddProductAlertMsg = document.getElementById("AddProductAlertMsg");
+                    let AddProductAlert = document.getElementById("AddProductAlert");
+                    AddProductAlertMsg.textContent = response.message;
+                    AddProductAlert.classList.remove("alert-danger", "alert-info");
+                    AddProductAlert.classList.add("alert-success");
+                    AddProductAlert.classList.remove("d-none");
+                    setTimeout(()=>{
+                        location.reload();
+                    }, 2000);
+                },  
+                error: function(response) {
+                    console.log(response.responseJSON);
+                    let alert = document.getElementById("AddProductAlert");
+                    let alertMsg = document.getElementById("AddProductAlertMsg");
+                    alertMsg.innerHTML = response.responseJSON.message;
+                    alert.classList.remove("alert-success", "alert-info");
+                    alert.classList.add("alert-danger");
+                    alert.classList.remove("d-none");
+                }
+            });
         });
     </script>
 </html>
