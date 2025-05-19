@@ -42,38 +42,159 @@ if (isset($_GET['id'])) {
         <!-- Header-->
         <header class="d-block d-md-none bg-dark py-3 px-4" style="max-height:50px">
                 <span class="text-white">
-                    <?php echo  $page_name?>
+                    <?php echo "Product"?>
                 </span>
         </header>
         <header class="d-none d-md-block bg-dark py-5 px-4">
             <div class="d-flex align-items-center" style="height: 100%;">
                 <span class="text-white fw-bold fs-3">
-                    <?php echo $page_name ?>
+                    <?php echo "Product" ?>
                 </span>
             </div>
         </header>
 
         <section class="py-2">
             <div class="container px-4 px-lg-5 mt-5">
-                <div class="row">
-                    <div class="col-6 mb-4">
-                        <h2 class="fw-bolder mb-4">Product Listing</h2>
+                <div class="w-100">
+                    <div class="alert alert-info" id="cart_info">
+                        <span id="cart_info_msg">
+                            Added cart successfully
+                        </span>
                     </div>
-                    <div class="col-6 mb-4 d-flex justify-content-end">
-                        <div>
-                            <a href="" 
-                            class="btn btn-success"
-                            data-bs-toggle="modal"
-                            data-bs-target="#addProductModal"
-                            >
-                                <i class="bi bi-plus"></i>
-                                Add Product
-                            </a>
+                </div>
+                <div class="w-100">
+                    <div class="col mb-4">
+                        <h2 class="fw-bolder mb-4 this_product_name" id="">Product Listing</h2>
+                    </div>
+                    <div class="d-flex flex-column flex-md-row">
+                        <div class="w-100 w-md-50">
+                            <div class="card shadow">
+                                <div style="min-width:100%;min-height:100%">
+                                    <div class="h-100 w-100">
+                                        1
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-100">
+                                <div class="row p-2">
+                                    <div class="col p-0 mx-2">
+                                        <div class="m-2 bg-primary h-100 w-100">
+                                            1
+                                        </div>
+                                    </div>
+                                    <div class="col p-0 mx-2">
+                                        <div class="m-2 bg-primary h-100 w-100">
+                                            1
+                                        </div>
+                                    </div>
+                                    <div class="col p-0 mx-2">
+                                        <div class="m-2 bg-primary h-100 w-100">
+                                            1
+                                        </div>
+                                    </div>
+                                    <div class="col p-0 mx-2">
+                                        <div class="m-2 bg-primary h-100 w-100">
+                                            1
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-100 w-md-50">
+                            <div class="p-4">
+                                <div class="w-100">
+                                    <div class="row">
+                                        <div class="col">
+                                            Type
+                                        </div>
+                                        <div class="col">
+                                            <span id="this_product_type"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            Description
+                                        </div>
+                                        <div class="col">
+                                            <span id="this_product_description"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            Product Code
+                                        </div>
+                                        <div class="col">
+                                            <span id="this_product_code"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            Stock
+                                        </div>
+                                        <div class="col">
+                                            <span id="this_product_stock"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="p-2">
+                                                <span class="fs-1" id="this_product_price_now">P500.00</span>
+                                                <span class="fs-4 text-underline text-decoration-line-through text-muted d-none" id="this_product_price_original">P1000.00</span>
+                                                <span class="bg-gray text-danger d-none" id="this_product_price_discount_percent">-15%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="w-100 mb-4">
+                                                <div class="input-group mb-4" style="max-width:200px">
+                                                    <div class="input-group-text p-0">
+                                                        <a class="text-decoration-none fs-3 text-black" id="product_quantity_set_value_dec">
+                                                            <span class="px-3">-</span>
+                                                        </a>
+                                                    </div>
+                                                    <div class="form-floating">
+                                                        <input type="text" id="product_quantity_set_value" class="form-control" placeholder="Qty." value="1">
+                                                        <label for="">Qty.</label>
+                                                    </div>
+                                                    <div class="input-group-text p-0">
+                                                        <a class="text-decoration-none fs-3 text-black" id="product_quantity_set_value_inc">
+                                                            <span class="px-3">+</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="alert alert-danger d-none" id="product_qunatity_limit_alert">
+                                                    Maximum quantity is <span id="product_quantity_set_value_max"></span>
+                                                </div>
+                                            </div>
+                                            <div class="w-100">
+                                                <a class="btn btn-primary" id="btnAddCart">Add to Cart</a>
+                                                <a class="btn btn-primary" id="btnBuyNow">Buy Now</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center" id="product_info">
-
+                <div class="row" id="product_info">
+                    <div class="col-12 card">
+                        <div class="m-4">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="m-2">
+                                        <div class="bg-secondary h-100 w-100">
+                                            1
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-8">
+                                    <span class="fs-5">
+                                        Seller Name
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -82,12 +203,12 @@ if (isset($_GET['id'])) {
     </body>
 
     <!-- Add Product -->
-    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+    <div class="modal fade" id="addToCartModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
-            <form method="POST" id="frmAddProduct">
+            <form method="POST" id="frmAddToCart">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
-                        <h5 class="modal-title fw-bold" id="AddProductTitle">Add Product</h5>
+                        <h5 class="modal-title fw-bold" id="AddProductTitle">Add to Cart: <span id=""></span></h5>
                     </div>
                     <div class="modal-body py-4 px-6" id="AddProductBody">
                         <div class="mb-2">
@@ -324,6 +445,107 @@ if (isset($_GET['id'])) {
 
 
     <script>
+        var this_product_id = "<?php echo $_GET['id']?>";
+        var this_product_quantity_max = 0;
+        var this_product_quantity_set = 0;
+        
+        let product_qunatity_limit_alert = document.getElementById("product_qunatity_limit_alert");
+        function fetchProduct() {
+            let params = new URLSearchParams({
+                product: true,
+                id: this_product_id
+            })
+            $.ajax({
+                url: '/api/v1.php?' + params,
+                type: 'GET',
+                success: function(response) {
+                    product = response.products[0];
+                    this_product_id = product.idProduct;
+                    let this_product_name = document.getElementsByClassName("this_product_name");
+                    for (let i = 0; i < this_product_name.length; i++) {
+                        this_product_name[i].textContent = product.product_name;
+                    }
+                    this_product_name.textContent = product.product_name;
+                    let this_product_type = document.getElementById("this_product_type");
+                    let this_product_description = document.getElementById("this_product_description");
+                    let this_product_code = document.getElementById("this_product_code");
+                    let this_product_stock = document.getElementById("this_product_stock");
+                    this_product_type.textContent = product.product_category;
+                    this_product_description.textContent = product.product_description;
+                    this_product_code.textContent = product.product_code;
+                    if (product.product_quantity > 0) {
+                        this_product_quantity_set = 1;
+                        this_product_stock.textContent = product.product_quantity;
+                        this_product_stock_max = product.product_quantity;
+                    } else {
+                        product_quantity_limit_alert.classList.remove('d-none');
+                    }
 
+                    let this_product_price_now = document.getElementById("this_product_price_now");
+                    let this_product_price_original = document.getElementById("this_product_price_original");
+                    console.log(product.product_price_now, product.product_price_original);
+                    let this_product_discount_set = Math.round((product.product_price_now / product.product_price_original) * 100) + "%";
+                    this_product_price_now.textContent = "₱" + product.product_price_now;
+                    this_product_price_original.textContent = "₱" + product.product_price_original;
+                    let this_product_price_discount_percent = document.getElementById("this_product_price_discount_percent");
+                    if (product.product_price_now > product.product_price_original) {
+                        this_product_price_original.classList.remove('d-none');
+                        this_product_price_discount_percent.classList.remove('d-none');
+                        this_product_price_discount_percent.textContent = this_product_discount_set;
+                    }
+                },
+                
+            })
+        }
+
+        fetchProduct();
+
+        let product_quantity_set_value = document.getElementById("product_quantity_set_value");
+        let product_quantity_set_value_dec = document.getElementById("product_quantity_set_value_dec");
+        let product_quantity_set_value_inc = document.getElementById("product_quantity_set_value_inc");
+        product_quantity_set_value_dec.addEventListener("click", function(e) {
+            e.preventDefault();
+            let value = parseInt(product_quantity_set_value.value);
+            if (value > 1) {
+                product_quantity_set_value.value = value - 1;
+            }
+        });
+        product_quantity_set_value_inc.addEventListener("click", function(e) {
+            e.preventDefault();
+            let value = parseInt(product_quantity_set_value.value);
+            if (value < this_product_stock_max) {
+                this_product_quantity_set =  value + 1;
+                product_quantity_set_value.value = this_product_quantity_set;
+            }
+        });
+
+        let btnAddCart = document.getElementById("btnAddCart");
+        let btnBuyNow = document.getElementById("btnBuyNow");
+
+        let cart_info = document.getElementById("cart_info");
+        let cart_info_msg = document.getElementById("cart_info_msg");
+
+        btnAddCart.addEventListener("click", function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/api/v1.php',
+                type: 'POST',
+                data: JSON.stringify({
+                    action : "cart_add",
+                    idUser : <?php echo $user_id?>,
+                    idProduct : this_product_id,
+                    quantity : this_product_quantity_set
+                }),
+                success: function(response) {
+                    console.log(response);
+                    cart_info.classList.remove('alert-info', 'alert-danger', 'alert-warning');
+                    cart_info.classList.add('alert-success');
+                    cart_info_msg.textContent = response.message;
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr);
+                }
+            })
+        })
     </script>
 </html>

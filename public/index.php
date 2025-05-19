@@ -31,6 +31,19 @@ include __DIR__ . "/../base.php";
         <!-- Section-->
         <section class="py-5">
             <div class="container px-4 px-lg-5 mt-5">
+            <div class="w-100 px-4 py-2 mb-4">
+                    <div class="input-group">
+                        <div class="input-group-text">
+                            <span class="px-2">
+                                <i class="bi bi-search"></i>
+                            </span>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" id="product_search" class="form-control" placeholder="Search">
+                            <label for="product_search">Search</label>
+                        </div>
+                    </div>
+                </div>
                 <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
                     <div class="col mb-5">
                         <div class="card h-100">

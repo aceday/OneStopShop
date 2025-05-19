@@ -785,7 +785,198 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(404);
             exit;
         }
-    } else {
+    } else if ($action == "cart_add") {
+        if (!isset($data->idUser) || !isset($data->idProduct) || !isset($data->quantity)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input user id and product id"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $idUser = $data->idUser;
+        $idProduct = $data->idProduct;
+        $quantity = $data->quantity;
+
+        if (empty($idUser) || empty($idProduct)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "User id and product id cannot be empty"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        try {
+            // Check product existence
+            $cur = $pdo->prepare("SELECT *
+                                FROM products
+                                WHERE idProduct = :idProduct");
+            $cur->execute(array(
+                ":idProduct" => $idProduct,
+            ));
+            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+            if (!$product_check) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 404,
+                    "message" => "Product not found"
+                ));
+                http_response_code(404);
+                exit;
+            }
+
+            // Check the quantity limit
+
+            // Add to cart
+            $cur = $pdo->prepare("INSERT INTO cart_data (user_id, product_id, quantity) VALUES (:idUser, :idProduct, :quantity)");
+            $cur->execute(array(
+                ":idUser" => $idUser,
+                ":idProduct" => $idProduct,
+                ":quantity" => $quantity
+            ));
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 201,
+                "message" => "Product added to cart successfully"
+            ));
+            http_response_code(201);
+            exit;
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
+    
+
+
+    } else if ($action == "cart_update") {
+        if (!isset($data->idUser) || !isset($data->idProduct) || !isset($data->quantity) || !isset($data->idCart)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input user id and product id"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $idUser = $data->idUser;
+        $idProduct = $data->idProduct;
+        $quantity = $data->quantity;
+        $idCart = $data->idCart;
+        if (empty($idUser) || empty($idProduct) || empty($idCart)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "User id, product id and cart id cannot be empty"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        try {
+            // Check product existence
+            $cur = $pdo->prepare("SELECT *
+                                FROM products
+                                WHERE idProduct = :idProduct");
+            $cur->execute(array(
+                ":idProduct" => $idProduct,
+            ));
+            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+            if (!$product_check) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 404,
+                    "message" => "Product not found"
+                ));
+                http_response_code(404);
+                exit;
+            }
+
+            // Check the quantity limit
+
+            // Update cart
+            $cur = $pdo->prepare("UPDATE cart_data
+                                    SET quantity = :quantity
+                                    WHERE idCart = :idCart");
+            $cur->execute(array(
+                ":quantity" => $quantity,
+                ":idCart" => $idCart
+            ));
+            
+            // Changes by afftected row
+            if ($cur->rowCount() > 0) {
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 200,
+                    "message" => "Cart updated successfully"
+                ));
+                http_response_code(200);
+                exit;
+            } else {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 403,
+                    "message" => "No changes made"
+                ));
+                http_response_code(403);
+                exit;
+            }
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
+    } if ($action == "cart_delete") {
+        if (!isset($data->idCart)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input cart id"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        $sql_cmd = "DELETE FROM cart_data WHERE idCart = :idCart";
+
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idCart", $data->idCart);
+        $cur->execute();
+
+        if ($cur->rowCount() > 0) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "Cart deleted successfully"
+            ));
+            http_response_code(200);
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "Cart not found"
+            ));
+            http_response_code(404);
+            exit;
+        }
+    }
+    
+    else {
         echo json_encode(array(
             "status" => "error",
             "status_code" => 400,
