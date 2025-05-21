@@ -36,7 +36,7 @@ if (isset($_GET['id'])) {
         <meta name="author" content="" />
         <title><?php echo $page_name?> | <?php echo $project_name?></title>
         <?php 
-        head_css();
+        head_css();head_js();
         head_js();
         ?>
     </head>

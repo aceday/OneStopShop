@@ -35,7 +35,10 @@ $role_type = $this_user->role_type;
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title><?php echo $page_name?> | <?php echo $project_name?></title>
-        <?php head_css(); ?>
+        <?php 
+        head_css();
+        head_js();
+        ?>
     </head>
     <body>
         <?php include_once __DIR__ . "/../navbar.php";?>
@@ -297,7 +300,7 @@ $role_type = $this_user->role_type;
                         <a class="page-link" href="#">Next</a>
                         </li>
                     </ul>
-                </nav>
+                </nav>''
             </div>
         </section>
         <?php after_js()?>
@@ -645,9 +648,9 @@ $role_type = $this_user->role_type;
         function fetchProducts() {
             let params = new URLSearchParams({
                 product: true, 
+                name: search_name,     
                 page: page,
-                paginate: paginate,
-                name: search_name      
+                paginate: paginate
             })
             console.log(params.toString());
             $.ajax({
@@ -701,6 +704,13 @@ $role_type = $this_user->role_type;
                     });
                 },
                 error: function(response) {
+                    
+                    products_list.innerHTML = "";
+                    products_list.innerHTML += `
+                    <div class="w-100 mb-4 p-4 card text-center fw-bold">
+                        ${response.responseJSON.message}
+                    </div>
+                    `;
                     console.log(response);
                 }
             });

@@ -22,11 +22,37 @@
             <div class="d-flex">
                 <?php if (isset($_COOKIE['auth_token']) && $role_type == "standard") : ?>
                 <div class="d-flex" id="standard_cart">
-                    <button class="btn btn-outline-dark" type="submit">
+                    <button class="btn btn-outline-dark" type="button" id="btnCart">
                         <i class="bi-cart-fill me-1"></i>
                         Cart
-                        <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
+                        <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart_total">0</span>
                     </button>
+                        
+                    <script>
+                            let this_user_id = "<?php echo $user_id?>";
+                            let cart_total = document.getElementById("cart_total");
+                            let btnCart = document.getElementById("btnCart");
+                            btnCart.addEventListener("click", function(e) {
+                                window.location.href = "/public/cart";
+                            });
+                            function fetchCartCount() {
+                                let params = new URLSearchParams({
+                                    cart: true,
+                                    user_id: this_user_id,
+                                    total: true
+                                })
+                                $.ajax({
+                                    url: '/api/v1.php?' + params,
+                                    type: 'GET',
+                                    success: function(response) {
+                                        console.log(response);
+                                        let cart_count = response.cart[0].total_carts;
+                                        cart_total.textContent = cart_count;
+                                    },
+                                });
+                            };
+                            fetchCartCount();
+                    </script>
                 <?php endif;?>
             </div>
                 <?php if (isset($_COOKIE["auth_token"])):?>
@@ -50,6 +76,11 @@
                         </ul>
                     </li>
                 </ul>
+                <?php else:?>
+                <div class="d-flex btn-group">
+                    <a class="btn btn-outline-dark" href="/public/login">Login</a>
+                    <a class="btn btn-outline-dark" href="/public/register">Register</a>
+                </div>
                 <?php endif;?>
             </div>
         </div>

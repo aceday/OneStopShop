@@ -23,8 +23,8 @@ $username = $this_user->username;
 $user_id = $this_user->user_id;
 $role_type = $this_user->role_type;
 
-echo json_encode($this_user);
-echo $role_type;
+// echo json_encode($this_user);
+// echo $role_type;
 // exit;
 ?>
 <!DOCTYPE html>
@@ -35,7 +35,10 @@ echo $role_type;
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title><?php echo $page_name?> | <?php echo $project_name?></title>
-        <?php head_css(); ?>
+        <?php
+        head_css();
+        head_js();
+        ?>
     </head>
     <body>
         <?php include_once __DIR__ . "/../navbar.php";?>

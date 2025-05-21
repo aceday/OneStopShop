@@ -31,7 +31,7 @@ $role_type = $this_user->role_type;
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title><?php echo $page_name?> | <?php echo $project_name?></title>
-        <?php head_css(); ?>
+        <?php head_css();head_js(); ?>
     </head>
     <body>
         <?php include_once __DIR__ . "/../navbar.php";?>

@@ -974,9 +974,198 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(404);
             exit;
         }
-    }
+    } else if ($action == "checkout-make") {
+        if (
+            !isset($data->name) || 
+            !isset($data->address) ||
+            !isset($data->deliver_type) ||
+            !isset($data->payment_type)
+        ) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Missing input"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        if (empty($data->name) ||
+            empty($data->address) ||
+            empty($data->deliver_type) ||
+            empty($data->payment_type)
+        ) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please fill up for the following fields"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        if (!isset($data->products) && !isset($data->carts)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input products or carts"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        if (isset($data->products) && isset($data->carts)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input either products or carts"
+            ));
+            http_response_code(400);
+            exit;
+        }
+
+        if (isset($data->products) && !isset($data->carts)) {
+            // Check product quantity
+            $sql_cmd = "SELECT
+                        *
+                    FROM
+                        products p
+                    WHERE
+                        p.idProduct = :idProduct
+            ";
+            $cur = $pdo->prepare($sql_cmd);
+            $cur->bindValue(":idProduct", $data->idProduct);
+            $cur->execute();
+            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+            if ($product_check['product_quantity'] < $data->quantity) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 400,
+                    "message" => "Product quantity is not enough"
+                ));
+                http_response_code(400);
+                exit;
+            }
+
+            $products = $data->products;
     
-    else {
+            // Check the every product was exists...
+            $product_ids = explode(";", $products);
+    
+            foreach($product_ids as $prod_id) {
+                $sql_cmd = "SELECT
+                                *
+                            FROM
+                                products p
+                            WHERE
+                                p.idProduct = :idProduct
+                ";
+                $cur = $pdo->prepare($sql_cmd);
+                $cur->bindValue(":idProduct", $prod_id);
+                $cur->execute();
+                $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+                if (!$product_check) {
+                    echo json_encode(array(
+                        "status" => "error",
+                        "status_code" => 404,
+                        "message" => "This product id was not found"
+                    ));
+                    http_response_code(404);
+                    exit;
+                }
+            }
+        }
+
+        if (isset($data->carts) && !isset($data->products)) {
+            $carts = $data->carts;
+
+            // Checking the carts available
+            $cart_ids = explode(";", $carts);
+            foreach($cart_ids as $cart_id) {
+                $sql_cmd = "SELECT
+                                *
+                            FROM
+                                cart_data c
+                            WHERE
+                                c.idCart = :idCart
+                ";
+                $cur = $pdo->prepare($sql_cmd);
+                $cur->bindValue(":idCart", $cart_id);
+                $cur->execute();
+                $cart_check = $cur->fetch(PDO::FETCH_ASSOC);
+                if (!$cart_check) {
+                    echo json_encode(array(
+                        "status" => "error",
+                        "status_code" => 404,
+                        "message" => "This cart id was not found"
+                    ));
+                    http_response_code(404);
+                    exit;
+                }
+                // Check the product quantity
+                $sql_cmd = "SELECT
+                                *
+                            FROM
+                                products p
+                            WHERE
+                                p.idProduct = :idProduct
+                ";
+                $cur = $pdo->prepare($sql_cmd);
+                $cur->bindValue(":idProduct", $cart_check['product_id']);
+                $cur->execute();
+                $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+                if ($product_check['product_quantity'] < $cart_check['quantity']) {
+                    echo json_encode(array(
+                        "status" => "error",
+                        "status_code" => 400,
+                        "message" => "Product quantity is not enough"
+                    ));
+                    http_response_code(400);
+                    exit;
+                }
+            }
+        }
+
+        $user_id = $data->idUser;
+        $name = $data->name;
+        $address = $data->address;
+        $deliver_type = $data->deliver_type;
+        $payment_type = $data->payment_type;
+
+        // Checkout time
+        // PDO begin transaction
+        $conn = $pdo->beginTransaction();
+        try {
+            if (isset($data->products)) {
+
+            } else if (isset($data->carts)) {
+                echo "OK";
+            }
+
+
+
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            exit;
+        }
+        exit;
+
+    }
+
+
+
+
+
+    else
+    
+    
+    {
         echo json_encode(array(
             "status" => "error",
             "status_code" => 400,
@@ -1265,8 +1454,97 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             http_response_code(404);
             exit;
         }
+    } else if (isset($_GET['cart'])) {
+        $sql_cmd = "SELECT c.idCart, c.user_id, c.product_id, c.quantity, p.product_name, p.product_price_now
+                    FROM cart_data c
+                    JOIN products p ON c.product_id = p.idProduct
+                    WHERE 1=1";
+            $params = [];
+            $types = "";
+
+            if (isset($_GET['idCart'])) {   
+            $sql_cmd .= " AND c.idCart = :idCart";
+            $params[":idCart"] = $_GET['idCart'];
+            $types .= "i";
+            }
+
+            if (isset($_GET['user_id'])) {
+            $sql_cmd .= " AND c.user_id = :user_id";
+            $params[":user_id"] = $_GET['user_id'];
+            $types .= "i";
+            }
+
+            if (isset($_GET['product_id'])) {
+            $sql_cmd .= " AND c.product_id = :product_id";
+            $params[":product_id"] = $_GET['product_id'];
+            $types .= "i";
+            }
+
+            // Cart -> idCart -> ASC / DESC
+            if (isset($_GET['sort_id'])) {
+            $sql_cmd .= " ORDER BY c.idCart " . $_GET['sort'];
+            }
+
+            // Cart -> user_id -> ASC / DESC
+            if (isset($_GET['sort_user'])) {
+            $sql_cmd .= " ORDER BY c.user_id " . $_GET['sort'];
+            }
+
+            // Cart -> product_id -> ASC / DESC
+            if (isset($_GET['sort_product'])) {
+            $sql_cmd .= " ORDER BY c.product_id " . $_GET['sort'];
+            }
+
+            // Cart -> pagination
+            if (isset($_GET['page']) && isset($_GET['paginate'])) {
+            $page = $_GET['page'];
+            $paginate = $_GET['paginate'];
+            $offset = ($page - 1) * $paginate;
+            $sql_cmd .= " LIMIT :offset, :paginate";
+            $params[":offset"] = $offset;
+            $params[":paginate"] = $paginate;
+            $types .= "ii";
+            }
+
+            // Cart -> total_cart for user
+            if (isset($_GET['total'])) {
+            $sql_cmd = "SELECT COUNT(c.idCart) as total_carts
+                        FROM cart_data c
+                        WHERE c.user_id = :user_id";
+            }
+
+            // Execute
+            $cur = $pdo->prepare($sql_cmd);
+            foreach ($params as $key => $value) {
+            $cur->bindValue($key, $value);
+            }
+            $cur->execute();
+            $total_cart = $cur->rowCount();
+            $cart = $cur->fetchAll(PDO::FETCH_ASSOC);
+            if ($cart) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "cart" => $cart
+            ));
+            http_response_code(200);
+            exit;
+
+            } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "No cart available"
+            ));
+            http_response_code(404);
+            exit;
+            }
     }
-} else {
+} 
+
+else 
+
+{
     echo json_encode(array(
         "status" => "error",
         "status_code" => 405,
