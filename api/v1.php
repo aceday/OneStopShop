@@ -17,6 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             "message" => "Bad Request"
         ));
         http_response_code(400);
+        $pdo = null;
         exit;
     }
 
@@ -30,6 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input username and password"
             ));
             http_response_code(401);
+            $pdo = null;
             exit;
         }
         
@@ -73,6 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         "token" => $token
                     ));
                     http_response_code(200);
+                    $pdo = null;
                     exit;
                 } else {
                     echo json_encode(array(
@@ -81,6 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         "message" => "Invalid username or password"
                     ));
                     http_response_code(401);
+                    $pdo = null;
                     exit;
                 }
             } else {
@@ -90,6 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Invalid username or password"
                 ));
                 http_response_code(401);
+                $pdo = null;
                 exit;
             }
         } catch (PDOException $e) {
@@ -99,6 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
 
@@ -110,6 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input username, email and password"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -124,6 +131,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Username, email and password cannot be empty"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -141,6 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Username already exists"
                 ));
                 http_response_code(409);
+                $pdo = null;
                 exit;
             }
 
@@ -157,6 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "User registered successfully"
             ));
             http_response_code(201);
+            $pdo = null;
             exit;
         } catch (PDOException $e) {
             echo json_encode(array(
@@ -165,6 +175,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
     } else if ($action == "forgot_password") { 
@@ -175,6 +186,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input email"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -187,6 +199,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Email cannot be empty"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -204,6 +217,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Email not found"
                 ));
                 http_response_code(404);
+                $pdo = null;
                 exit;
             }
         } catch (PDOException $e) {
@@ -213,6 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
 
@@ -237,6 +252,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             ));
             http_response_code(401);
         }
+        $pdo = null;
         exit;
 
     // Category
@@ -248,6 +264,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input category name"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -261,6 +278,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Category name cannot be empty"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -278,6 +296,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Category already exists"
                 ));
                 http_response_code(409);
+                $pdo = null;
                 exit;
             }
 
@@ -292,6 +311,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Category created successfully"
             ));
             http_response_code(201);
+            $pdo = null;
             exit;
         } catch (PDOException $e) {
             echo json_encode(array(
@@ -300,6 +320,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
     } else if ($action == "category_update") {
@@ -310,6 +331,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input category id and name"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -324,6 +346,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Category id and name cannot be empty"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -341,6 +364,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Category not found"
                 ));
                 http_response_code(404);
+                $pdo = null;
                 exit;
             }
             
@@ -369,6 +393,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ));
                 http_response_code(403);
             }
+            $pdo = null;
             exit;
         } catch (PDOException $e) {
             echo json_encode(array(
@@ -377,6 +402,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
     } else if ($action == "category_delete") {
@@ -403,6 +429,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Category deleted successfully"
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         } else {
             echo json_encode(array(
@@ -411,6 +438,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Category not found"
             ));
             http_response_code(404);
+            $pdo = null;
             exit;
         }
     } else if ($action == "product_create") {
@@ -428,6 +456,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please fill up for the following fields"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -455,6 +484,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please fill up for the following fields"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -474,6 +504,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Product already exists"
                 ));
                 http_response_code(409);
+                $pdo = null;
                 exit;
             }
             $cur = $pdo->prepare("INSERT INTO products (product_code, product_name, product_category, product_price_now, product_price_original, product_description, product_quantity)
@@ -493,6 +524,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Product created successfully"
             ));
             http_response_code(201);
+            $pdo = null;
             exit;
         } catch (PDOException $e) {
             echo json_encode(array(
@@ -501,6 +533,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
     } else if ($action == "product_update") {
@@ -519,6 +552,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please fill up for the following fields"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -546,6 +580,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please fill up for the following fields"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -565,6 +600,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Product not found"
                 ));
                 http_response_code(404);
+                $pdo = null;
                 exit;
             }
             
@@ -598,6 +634,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ));
                 http_response_code(403);
             }
+            $pdo = null;
             exit;
         } catch (PDOException $e) {
             echo json_encode(array(
@@ -606,8 +643,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
+        $pdo = null;
         exit;
     } else if ($action == "product_delete") {
         if (!isset($data->id) && !isset($data->code)) {
@@ -639,6 +678,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Product not found"
                 ));
                 http_response_code(404);
+                $pdo = null;
                 exit;
             }
 
@@ -672,6 +712,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
 
@@ -689,6 +730,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "User id is not present"
             ));
             http_response_code(403);
+            $pdo = null;
             exit;
         }
 
@@ -706,6 +748,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "User id cannot be empty"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -731,6 +774,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "User updated successfully"
                 ));
                 http_response_code(200);
+                $pdo = null;
                 exit;
             } else {
                 echo json_encode(array(
@@ -739,6 +783,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "No changes made"
                 ));
                 http_response_code(403);
+                $pdo = null;
                 exit;
             }
         } catch (PDOException $e) {
@@ -748,6 +793,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
     } else if ($action == "user_delete") {
@@ -758,6 +804,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input user id"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -775,6 +822,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "User deleted successfully"
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         } else {
             echo json_encode(array(
@@ -783,6 +831,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "User not found"
             ));
             http_response_code(404);
+            $pdo = null;
             exit;
         }
     } else if ($action == "cart_add") {
@@ -793,6 +842,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input user id and product id"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -807,6 +857,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "User id and product id cannot be empty"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -826,6 +877,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Product not found"
                 ));
                 http_response_code(404);
+                $pdo = null;
                 exit;
             }
 
@@ -844,6 +896,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Product added to cart successfully"
             ));
             http_response_code(201);
+            $pdo = null;
             exit;
         } catch (PDOException $e) {
             echo json_encode(array(
@@ -852,6 +905,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
     
@@ -865,6 +919,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input user id and product id"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -879,6 +934,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "User id, product id and cart id cannot be empty"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -898,6 +954,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Product not found"
                 ));
                 http_response_code(404);
+                $pdo = null;
                 exit;
             }
 
@@ -920,6 +977,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Cart updated successfully"
                 ));
                 http_response_code(200);
+                $pdo = null;
                 exit;
             } else {
                 echo json_encode(array(
@@ -928,6 +986,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "No changes made"
                 ));
                 http_response_code(403);
+                $pdo = null;
                 exit;
             }
         } catch (PDOException $e) {
@@ -937,6 +996,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
             exit;
         }
     } if ($action == "cart_delete") {
@@ -947,6 +1007,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input cart id"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -964,6 +1025,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Cart deleted successfully"
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         } else {
             echo json_encode(array(
@@ -972,6 +1034,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Cart not found"
             ));
             http_response_code(404);
+            $pdo = null;
             exit;
         }
     } else if ($action == "checkout-make") {
@@ -987,6 +1050,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Missing input"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -1001,6 +1065,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please fill up for the following fields"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -1011,6 +1076,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input products or carts"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -1021,58 +1087,129 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input either products or carts"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
-        if (isset($data->products) && !isset($data->carts)) {
+        if (isset($data->products) && !isset($data->carts) && isset($data->quantity)) {
             // Check product quantity
             $sql_cmd = "SELECT
-                        *
-                    FROM
-                        products p
-                    WHERE
-                        p.idProduct = :idProduct
+                            *
+                        FROM
+                            products p
+                        WHERE
+                            p.idProduct = :idProduct
             ";
             $cur = $pdo->prepare($sql_cmd);
-            $cur->bindValue(":idProduct", $data->idProduct);
+            $cur->bindValue(":idProduct", $data->products);
             $cur->execute();
             $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-            if ($product_check['product_quantity'] < $data->quantity) {
+            // echo json_encode(array(
+            //     "status" => "success",
+            //     "status_code" => 200,
+            //     "message" => "Product quantity is enough",
+            //     "products" => $product_check
+            // ));
+            // $pdo = null;
+            // exit;
+            // if ($product_check['product_quantity'] < $data->quantity) {
+            //     echo json_encode(array(
+            //         "status" => "error",
+            //         "status_code" => 400,
+            //         "message" => "Product quantity is not enough"
+            //     ));
+            //     http_response_code(400);
+            //     $pdo = null;
+            // exit;
+            // }
+
+            // Checking quantity
+            $sql_cmd = "SELECT
+                            *
+                        FROM
+                            products p
+                        WHERE
+                            p.idProduct = :idProduct
+            ";
+            $cur = $pdo->prepare($sql_cmd);
+            $cur->bindValue(":idProduct", $data->products);
+            $cur->execute();
+            $product_check_qty = $cur->fetch(PDO::FETCH_ASSOC);
+            if ($product_check_qty['product_quantity'] == 0) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 400,
+                    "message" => "Out of stock"
+                ));
+                http_response_code(400);
+                $pdo = null;
+                exit;
+            } else if ($product_check_qty['product_quantity'] < $data->quantity) {
                 echo json_encode(array(
                     "status" => "error",
                     "status_code" => 400,
                     "message" => "Product quantity is not enough"
                 ));
                 http_response_code(400);
+                $pdo = null;
                 exit;
-            }
+            } else {
+                // Then checkout/order now
 
-            $products = $data->products;
-    
-            // Check the every product was exists...
-            $product_ids = explode(";", $products);
-    
-            foreach($product_ids as $prod_id) {
-                $sql_cmd = "SELECT
-                                *
-                            FROM
-                                products p
-                            WHERE
-                                p.idProduct = :idProduct
-                ";
-                $cur = $pdo->prepare($sql_cmd);
-                $cur->bindValue(":idProduct", $prod_id);
-                $cur->execute();
-                $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-                if (!$product_check) {
+                // begin transaction
+
+                $pdo->beginTransaction();
+
+                try {
+                    $sql_cmd = "INSERT INTO orders
+                                    (product_ids, `status`, `name`, `address`, deliver_type, payment_type, contact_no)
+                                VALUES
+                                    (:product_ids, :status, :name, :address, :deliver_type, :payment_type, :contact_no)
+                    ";
+                    $cur = $pdo->prepare($sql_cmd);
+                    $cur->bindValue(":product_ids", $data->products);
+                    $cur->bindValue(":status", "pending");
+                    $cur->bindValue(":name", $data->name);
+                    $cur->bindValue(":address", $data->address);
+                    $cur->bindValue(":deliver_type", $data->deliver_type);
+                    $cur->bindValue(":payment_type", $data->payment_type);
+                    $cur->bindValue(":contact_no", $data->contact_no);
+
+                    $cur->execute();
+
+                    // Then decrase the product quantity
+                    $sql_cmd = "UPDATE products
+                                    SET product_quantity = product_quantity - :quantity
+                                WHERE idProduct = :idProduct";
+                    $cur = $pdo->prepare($sql_cmd);
+                    $cur->bindValue(":quantity", $data->quantity);
+                    $cur->bindValue(":idProduct", $data->products);
+                    $cur->execute();
+
+                    echo json_encode(array(
+                        "status" => "success",
+                        "status_code" => 201,
+                        "message" => "Order created successfully"
+                    ));
+
+                    http_response_code(201);
+
+                    // $pdo->rollBack();
+                    $pdo->commit();
+
+                } catch (PDOException $e) {
+                    // Rollback transaction
+                    $pdo->rollBack();
                     echo json_encode(array(
                         "status" => "error",
-                        "status_code" => 404,
-                        "message" => "This product id was not found"
+                        "status_code" => 500,
+                        "message" => $e->getMessage()
                     ));
-                    http_response_code(404);
+                    http_response_code(500);
+                    $pdo = null;
                     exit;
                 }
+
             }
         }
 
@@ -1100,6 +1237,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         "message" => "This cart id was not found"
                     ));
                     http_response_code(404);
+                    $pdo = null;
                     exit;
                 }
                 // Check the product quantity
@@ -1121,46 +1259,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         "message" => "Product quantity is not enough"
                     ));
                     http_response_code(400);
+                    $pdo = null;
                     exit;
+                } else {
+                    // Decrease the products
+                    $sql_cmd = "SELECT
+                                    *
+                                FROM
+                                    products p
+                                WHERE
+                                    p.idProduct = :idProduct";
+                    $cur = $pdo->prepare($sql_cmd);
+                    $cur->bindValue(":idProduct", $cart_check['product_id']);
+                    $cur->execute();
+                    $product_check = $cur->fetch(PDO::FETCH_ASSOC);
+
+                    // foreach 
+                    // echo json_encode(array(
+                    //     "status" => "success",
+                    //     "status_code" => 200,
+                    //     "message" => "Product quantity is enough",
+                    //     "products" => $product_check
+                    // ));
+                }
+                    
+
                 }
             }
-        }
 
         $user_id = $data->idUser;
         $name = $data->name;
         $address = $data->address;
         $deliver_type = $data->deliver_type;
         $payment_type = $data->payment_type;
-
-        // Checkout time
-        // PDO begin transaction
-        $conn = $pdo->beginTransaction();
-        try {
-            if (isset($data->products)) {
-
-            } else if (isset($data->carts)) {
-                echo "OK";
-            }
-
-
-
-        } catch (Exception $e) {
-            $conn->rollback();
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 500,
-                "message" => $e->getMessage()
-            ));
-            http_response_code(500);
-            exit;
-        }
-        exit;
-
+        
     }
-
-
-
-
 
     else
     
@@ -1172,6 +1305,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             "message" => "Bad Request"
         ));
         http_response_code(400);
+        $pdo = null;
         exit;
     }
 } else if ($_SERVER["REQUEST_METHOD"] === "GET") {
@@ -1229,6 +1363,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "total_categories" => $total_categories
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         }
 
@@ -1248,6 +1383,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "categories" => $categories
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         } else {
             echo json_encode(array(
@@ -1256,6 +1392,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "No categories available"
             ));
             http_response_code(404);
+            $pdo = null;
             exit;
         }
     } else if (isset($_GET['product'])) {
@@ -1266,7 +1403,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         //         "message" => "Please input product id"
         //     ));
         //     http_response_code(400);
-        //     exit;
+        //     $pdo = null;
+        // exit;
         // }
 
         $sql_cmd = "SELECT *
@@ -1335,6 +1473,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "total_products" => $total_products
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         }
 
@@ -1353,6 +1492,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "products" => $products
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         } else {
             echo json_encode(array(
@@ -1361,6 +1501,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "No products available"
             ));
             http_response_code(404);
+            $pdo = null;
             exit;
         }
     } else if (isset($_GET['user'])) {
@@ -1371,6 +1512,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "Please input user id"
             ));
             http_response_code(400);
+            $pdo = null;
             exit;
         }
 
@@ -1444,6 +1586,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "users" => $users
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
         } else {
             echo json_encode(array(
@@ -1452,6 +1595,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "No users available"
             ));
             http_response_code(404);
+            $pdo = null;
             exit;
         }
     } else if (isset($_GET['cart'])) {
@@ -1528,6 +1672,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "cart" => $cart
             ));
             http_response_code(200);
+            $pdo = null;
             exit;
 
             } else {
@@ -1537,6 +1682,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => "No cart available"
             ));
             http_response_code(404);
+            $pdo = null;
             exit;
             }
     }
@@ -1551,5 +1697,6 @@ else
         "message" => "Method Not Allowed"
     ));
     http_response_code(405);
+    $pdo = null;
     exit;
 }
