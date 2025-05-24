@@ -155,30 +155,30 @@ if (isset($_GET['id'])) {
                                             </div>
                                         </div>
                                         <div class="col-12">
-                                            <div class="w-100 mb-4">
-                                                <div class="input-group mb-4" style="max-width:200px">
-                                                    <div class="input-group-text p-0">
-                                                        <a class="text-decoration-none fs-3 text-black" id="product_quantity_set_value_dec">
-                                                            <span class="px-3">-</span>
-                                                        </a>
+                                            <div class="w-100 d-none" id="buyToggle">
+                                                <div class="w-100 mb-4">
+                                                    <div class="input-group mb-4" style="max-width:200px">
+                                                        <div class="input-group-text p-0">
+                                                            <a class="text-decoration-none fs-3 text-black" id="product_quantity_set_value_dec">
+                                                                <span class="px-3">-</span>
+                                                            </a>
+                                                        </div>
+                                                        <div class="form-floating">
+                                                            <input type="text" id="product_quantity_set_value" class="form-control" placeholder="Qty." value="1">
+                                                            <label for="">Qty.</label>
+                                                        </div>
+                                                        <div class="input-group-text p-0">
+                                                            <a class="text-decoration-none fs-3 text-black" id="product_quantity_set_value_inc">
+                                                                <span class="px-3">+</span>
+                                                            </a>
+                                                        </div>
                                                     </div>
-                                                    <div class="form-floating">
-                                                        <input type="text" id="product_quantity_set_value" class="form-control" placeholder="Qty." value="1">
-                                                        <label for="">Qty.</label>
-                                                    </div>
-                                                    <div class="input-group-text p-0">
-                                                        <a class="text-decoration-none fs-3 text-black" id="product_quantity_set_value_inc">
-                                                            <span class="px-3">+</span>
-                                                        </a>
+                                                    <div class="alert alert-danger d-none" id="product_qunatity_limit_alert">
+                                                        Maximum quantity is <span id="product_quantity_set_value_max"></span>
                                                     </div>
                                                 </div>
-                                                <div class="alert alert-danger d-none" id="product_qunatity_limit_alert">
-                                                    Maximum quantity is <span id="product_quantity_set_value_max"></span>
-                                                </div>
-                                            </div>
-                                            <div class="w-100">
                                                 <a class="btn btn-primary" id="btnAddCart">Add to Cart</a>
-                                                <a class="btn btn-primary" id="btnBuyNow">Buy Now</a>
+                                                <a class="btn btn-primary" id="btnBuyNow" data-bs-toggle="modal" data-bs-target="#buyModal">Buy Now</a>
                                             </div>
                                         </div>
                                     </div>
@@ -192,6 +192,84 @@ if (isset($_GET['id'])) {
         <?php after_js()?>
         <?php include_once __DIR__ . "/../footer.php";?>
     </body>
+
+    <div class="modal fade" id="buyModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+        <div class="modal-dialog" role="document">
+            <form method="POST" id="frmBuyNow">
+                <div class="modal-content">
+                    <div class="modal-header bg-orange-custom d-flex justify-content-start">
+                        <h5 class="modal-title fw-bold" id="buyNowTitle">Buy Now > Customer Details</h5>
+                    </div>
+                    <div class="modal-body py-4 px-6" id="buyNowBody">
+                        <div class="mb-2">
+                            <div class="alert alert-danger w-100 d-none" id="buyNowAlert">
+                                <span id="buyNowAlertMsg"></span>
+                            </div>
+                        </div>
+                        <div class="alert alert-info w-100" id="add_cat_name_alert">
+                            <span id="add_cat_name_alert_msg">
+                                <span>
+                                    <i class="bi bi-info-circle-fill"></i>
+                                </span>
+                                Fill up for the following
+                            </span>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <input type="text" name="customer_name" id="customer_name" class="form-control" placeholder="Customer Name" required>
+                                <label for="customer_name">Name</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <textarea name="customer_address" id="customer_address" class="form-control" placeholder="Customer Address"></textarea>
+                                <label for="customer_address">Address</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <textarea name="customer_phone_no" id="customer_phone_no" class="form-control" placeholder="Customer Phone No."></textarea>
+                                <label for="customer_phone_no">Phone Number</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <select name="customer_deliver_type" id="customer_deliver_type" class="form-control">
+                                    <option value="none">--</option>
+                                    <option value="pickup">Pick-up</option>
+                                    <option value="deliver">Deliver</option>
+                                </select>
+                                <label for="customer_deliver_type">Deliver Type</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
+                            <div class="form-floating">
+                                <select name="customer_payment_type" id="customer_payment_type" class="form-control">
+                                    <option value="none">--</option>
+                                    <option value="cod">Cash On Delivery (COD)</option>
+                                    <option value="card">Card</option>
+                                    <option value="gcash">GCash</option>
+                                </select>
+                                <label for="customer_payment_type">Payment Type</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer" id="buyNowFooter">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success" id="btnBuyNowSubmit">
+                                <i class="bi bi-floppy-fill"></i>
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         var this_product_id = "<?php echo $_GET['id']?>";
@@ -223,11 +301,14 @@ if (isset($_GET['id'])) {
                     this_product_description.textContent = product.product_description;
                     this_product_code.textContent = product.product_code;
                     if (product.product_quantity > 0) {
+                        buyToggle.classList.remove('d-none');
                         this_product_quantity_set = 1;
                         this_product_stock.textContent = product.product_quantity;
                         this_product_stock_max = product.product_quantity;
                     } else {
-                        product_quantity_limit_alert.classList.remove('d-none');
+                        // product_quantity_limit_alert.classList.remove('d-none');
+                        this_product_stock.textContent = "Out of Stock";
+                        this_product_stock.classList.add('text-danger', 'fw-bold');
                     }
 
                     let this_product_price_now = document.getElementById("this_product_price_now");
@@ -249,6 +330,7 @@ if (isset($_GET['id'])) {
 
         fetchProduct();
 
+        let buyToggle = document.getElementById("buyToggle");
         let product_quantity_set_value = document.getElementById("product_quantity_set_value");
         let product_quantity_set_value_dec = document.getElementById("product_quantity_set_value_dec");
         let product_quantity_set_value_inc = document.getElementById("product_quantity_set_value_inc");
@@ -284,6 +366,7 @@ if (isset($_GET['id'])) {
                     idUser : <?php echo $user_id?>,
                     idProduct : this_product_id,
                     quantity : this_product_quantity_set
+
                 }),
                 success: function(response) {
                     console.log(response);
@@ -300,5 +383,51 @@ if (isset($_GET['id'])) {
                 }
             })
         })
+
+        let frmBuyNow = document.getElementById('frmBuyNow');
+        frmBuyNow.addEventListener('submit', function (e) {
+            e.preventDefault();
+        
+            let formData = new FormData(this);
+            let customer_name = formData.get("customer_name");
+            let customer_address = formData.get("customer_address");
+            let customer_phone_no = formData.get("customer_phone_no");
+            let customer_deliver_type = formData.get("customer_deliver_type");
+            let customer_payment_type = formData.get("customer_payment_type");
+        
+            let buyNowAlert = document.getElementById("buyNowAlert");
+            let buyNowAlertMsg = document.getElementById("buyNowAlertMsg");
+            $.ajax({
+                url: '/api/v1.php',
+                type: 'POST',
+                data: JSON.stringify({
+                    action: "checkout-make",
+                    idUser: this_user_id,
+                    name: customer_name,
+                    address: customer_address,
+                    contact_no: customer_phone_no,
+                    products: this_product_id,
+                    quantity: this_product_quantity_set,
+                    deliver_type: customer_deliver_type,
+                    payment_type: customer_payment_type
+                }),
+                success: function(response) {
+                    console.log(response);
+                    buyNowAlertMsg.textContent = response.message;
+                    buyNowAlert.classList.remove('alert-info', 'alert-danger');
+                    buyNowAlert.classList.add('alert-success');
+                    buyNowAlert.classList.remove('d-none');
+                    setTimeout(function() {
+                        window.location.href = "/public/dashboard";
+                    }, 2000);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error XHR:", xhr);
+                    console.error("Error Status:", status);
+                    console.error("Error:", error);
+                }
+            });
+        });
+
     </script>
 </html>

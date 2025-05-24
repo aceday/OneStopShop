@@ -1,6 +1,29 @@
 <?php
 include __DIR__ . "/../base.php";
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+if (!isset($_COOKIE["auth_token"])) {
+    header("Location: /public/login");
+    exit;
+}
+
+
+try {
+    $this_user = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
+} catch (Exception $e) {
+    header("Location: /public/login");
+    exit;
+}
+
+$username = $this_user->username;
+$user_id = $this_user->user_id;
+$role_type = $this_user->role_type;
+
+if (isset($_GET['id'])) {
+    // Pass
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

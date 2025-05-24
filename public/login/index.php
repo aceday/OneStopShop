@@ -88,6 +88,7 @@ $page_name = "Login";
 
         frmLogin.addEventListener("submit", function(e) {
             e.preventDefault();
+            e.preventDefault();
             let formData = new FormData(this);
 
             let auth_username = formData.get("auth_username");

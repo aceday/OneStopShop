@@ -6,9 +6,10 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#!">About Us</a></li>
-                <li class="nav-item"><a class="nav-link" href="#!">Contact Us</a></li>
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="/public">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/public/about">About Us</a></li>
+                <li class="nav-item"><a class="nav-link" href="/public/contact">Contact Us</a></li>
+                <?php if (isset($_COOKIE['auth_token'])) : ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -18,6 +19,7 @@
                         <li><a class="dropdown-item" href="#!">New Arrivals</a></li>
                     </ul>
                 </li>
+                <?php endif;?>
             </ul>
             <div class="d-flex">
                 <?php if (isset($_COOKIE['auth_token']) && $role_type == "standard") : ?>
@@ -62,8 +64,8 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="#!">My Profile</a></li>
                             <?php if (isset($_COOKIE['auth_token']) && $role_type == "standard"):?>
-                            <li><a class="dropdown-item" href="#!">My Wishlist</a></li>
-                            <li><a class="dropdown-item" href="#!">My Orders</a></li>
+                            <!-- <li><a class="dropdown-item" href="#!">My Wishlist</a></li> -->
+                            <li><a class="dropdown-item" href="/public/orders">My Orders</a></li>
                             <?php endif;?>
                             <?php if (isset($_COOKIE['auth_token']) && $role_type == "admin"):?>
                             <li><a class="dropdown-item" href="/public/product_management">Product Managment</a></li>
