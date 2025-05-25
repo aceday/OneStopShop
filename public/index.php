@@ -1,6 +1,8 @@
 <?php
 include __DIR__ . "/../base.php";
 
+header('Location: /public/dashboard/');
+exit();
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 

@@ -545,7 +545,7 @@ $role_type = $this_user->role_type;
                         </div>
                         <div class="modal-footer" id="AddProductFooter">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary" id="btnAddProduct">
+                            <button type="submit" class="btn btn-secondary" id="btnAddProduct">
                                 <i class="bi bi-floppy-fill"></i>
                                 Update
                             </button>

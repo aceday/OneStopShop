@@ -1162,9 +1162,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 try {
                     $sql_cmd = "INSERT INTO orders
-                                    (product_ids, `status`, `name`, `address`, deliver_type, payment_type, contact_no)
+                                    (product_ids, `status`, `name`, `address`, deliver_type, payment_type, contact_no, user_id)
                                 VALUES
-                                    (:product_ids, :status, :name, :address, :deliver_type, :payment_type, :contact_no)
+                                    (:product_ids, :status, :name, :address, :deliver_type, :payment_type, :contact_no, :user_id)
                     ";
                     $cur = $pdo->prepare($sql_cmd);
                     $cur->bindValue(":product_ids", $data->products);
@@ -1174,6 +1174,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $cur->bindValue(":deliver_type", $data->deliver_type);
                     $cur->bindValue(":payment_type", $data->payment_type);
                     $cur->bindValue(":contact_no", $data->contact_no);
+                    $cur->bindValue(":user_id", $data->idUser);
 
                     $cur->execute();
 
@@ -1685,6 +1686,92 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pdo = null;
             exit;
             }
+
+    } else if (isset($_GET['orders'])) {
+        $sql_cmd = "SELECT o.idOrder, o.product_ids, o.status, o.name, o.address, o.deliver_type, o.payment_type, o.contact_no, o.created_at, p.product_name, p.product_price_now
+                    FROM orders o
+                    LEFT JOIN products p ON o.product_ids = p.idProduct
+                    WHERE 1=1";
+        $params = [];
+        $types = "";
+
+        // Order -> idOrder
+        if (isset($_GET['id'])) {   
+            $sql_cmd .= " AND idOrder = :idOrder";
+            $params[":idOrder"] = $_GET['id'];
+            $types .= "i";
+        }
+
+        // Order -> status
+        if (isset($_GET['status'])) {
+            $sql_cmd .= " AND status = :status";
+            $params[":status"] = $_GET['status'];
+            $types .= "s";
+        }
+
+        // Order -> user_id
+        if (isset($_GET['user_id'])) {
+            $sql_cmd .= " AND user_id = :user_id";
+            $params[":user_id"] = $_GET['user_id'];
+            $types .= "i";
+        }
+
+        // Order -> pagination
+        if (isset($_GET['page']) && isset($_GET['paginate'])) {
+            $page = $_GET['page'];
+            $paginate = $_GET['paginate'];
+            $offset = ($page - 1) * $paginate;
+            $sql_cmd .= " LIMIT :offset, :paginate";
+            $params[":offset"] = $offset;
+            $params[":paginate"] = $paginate;
+            $types .= "ii";
+        }
+
+        // Order -> total_orders
+        if (isset($_GET['total'])) {
+            $sql_cmd = "SELECT COUNT(*) as total_orders FROM orders";
+            $cur = $pdo->prepare($sql_cmd);
+            $cur->execute();
+            $total_orders = $cur->fetch(PDO::FETCH_ASSOC);
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "total_orders" => $total_orders
+            ));
+            http_response_code(200);
+            $pdo = null;
+            exit;
+        }
+
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        foreach ($params as $key => $value) {
+            $cur->bindValue($key, $value);
+        }
+        $cur->execute();
+        $total_orders = $cur->rowCount();
+
+        $orders = $cur->fetchAll(PDO::FETCH_ASSOC);
+        if ($orders) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "orders" => $orders,
+                "total_orders" => $total_orders
+            ));
+            http_response_code(200);
+            $pdo = null;
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "No orders available"
+            ));
+            http_response_code(404);
+            $pdo = null;
+            exit;
+        }
     }
 } 
 

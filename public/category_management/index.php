@@ -175,7 +175,7 @@ $role_type = $this_user->role_type;
                         </div>
                         <div class="modal-footer" id="AddCategoryFooter">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary" id="btnAddCategory">
+                            <button type="submit" class="btn btn-secondary" id="btnAddCategory">
                                 <i class="bi bi-floppy-fill"></i>
                                 Update
                             </button>
@@ -253,7 +253,7 @@ $role_type = $this_user->role_type;
                                     </div>
                                     <div class="col-4">
                                         <a
-                                        class="btn btn-primary"
+                                        class="btn btn-secondary"
                                         id="category-update-${category.idCategory}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#updateCategoryModal"

@@ -177,8 +177,8 @@ if (isset($_GET['id'])) {
                                                 </div>
                                             </div>
                                             <div class="w-100">
-                                                <a class="btn btn-primary" id="btnAddCart">Add to Cart</a>
-                                                <a class="btn btn-primary" id="btnBuyNow">Buy Now</a>
+                                                <a class="btn btn-secondary" id="btnAddCart">Add to Cart</a>
+                                                <a class="btn btn-secondary" id="btnBuyNow">Buy Now</a>
                                             </div>
                                         </div>
                                     </div>

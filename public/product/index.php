@@ -177,8 +177,8 @@ if (isset($_GET['id'])) {
                                                         Maximum quantity is <span id="product_quantity_set_value_max"></span>
                                                     </div>
                                                 </div>
-                                                <a class="btn btn-primary" id="btnAddCart">Add to Cart</a>
-                                                <a class="btn btn-primary" id="btnBuyNow" data-bs-toggle="modal" data-bs-target="#buyModal">Buy Now</a>
+                                                <a class="btn btn-secondary" id="btnAddCart">Add to Cart</a>
+                                                <a class="btn btn-secondary" id="btnBuyNow" data-bs-toggle="modal" data-bs-target="#buyModal">Buy Now</a>
                                             </div>
                                         </div>
                                     </div>
@@ -363,7 +363,7 @@ if (isset($_GET['id'])) {
                 type: 'POST',
                 data: JSON.stringify({
                     action : "cart_add",
-                    idUser : <?php echo $user_id?>,
+                    idUser : this_user_id,
                     idProduct : this_product_id,
                     quantity : this_product_quantity_set
 
@@ -418,7 +418,7 @@ if (isset($_GET['id'])) {
                     buyNowAlert.classList.add('alert-success');
                     buyNowAlert.classList.remove('d-none');
                     setTimeout(function() {
-                        window.location.href = "/public/dashboard";
+                        window.location.href = "/public/orders";
                     }, 2000);
                 },
                 error: function(xhr, status, error) {

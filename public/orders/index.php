@@ -52,19 +52,9 @@ $role_type = $this_user->role_type;
         <section class="py-2">
             <div class="container px-4 px-lg-5 mt-5">
                 <div class="row">
-                    <div class="col-6 mb-4">
-                        <h2 class="fw-bolder mb-4"><?php echo $page_name;?></h2>
-                    </div>
-                    <div class="col-6 mb-4 d-flex justify-content-end">
-                        <div>
-                            <a href="" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AddCategoryModal">
-                                <i class="bi bi-plus"></i>
-                                Add Category
-                            </a>
-                        </div>
-                    </div>
+
                 </div>
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center" id="order_list">
+                <div class="row mb-4" id="order_list">
                 </div>
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-center">
@@ -179,102 +169,97 @@ $role_type = $this_user->role_type;
     <script>
         var page = 1;
         var paginate = 10;
-        let category_list = document.getElementById("category_list");
-
-        function fetchCategory() {
-            let params = new URLSearchParams({
-                category: true,
+        let order_list = document.getElementById("order_list");
+        function fetchOrderList() {
+            let param = new URLSearchParams({
+                orders: true,
+                user_id: this_user_id,
                 page: page,
-                paginate: paginate
+                paginate: paginate,
             });
             $.ajax({
-                url: "/api/v1.php?" + params,
-                type: "GET",
+                url: '/api/v1.php?' + param,
+                type: 'GET',
                 success: function(response) {
+                    let orders = response.orders;
                     console.log(response);
-                    let categories = response.categories;
-                    categories.forEach(category => {
-                        let category_card = `
-                            <div class="card mb-4 w-100" style="min-height: 30px;">
-                                <div class="row p-3">
-                                    <div class="col-8">
-                                        <h5>${category.category_name}</h5>
-                                        <p>${category.category_description ? category.category_description : "No content"}</p>
-                                    </div>
-                                    <div class="col-4">
-                                        <a
-                                        class="btn btn-primary"
-                                        id="category-update-${category.idCategory}"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#updateCategoryModal"
-                                        ><i class="bi bi-pen"></i> Update</a>
-                                        <a
-                                        class="btn btn-danger"
-                                        id="category-delete-${category.idCategory}"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteCategoryModal"
-                                        ><i class="bi bi-trash"></i> Delete</a>
+                    order_list.innerHTML = "";
+                    orders.forEach(order => {
+                        order_list.innerHTML += `
+                            <div class="col-12 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="text-start">
+                                            <h5 class="fw-bolder">${order.product_name}<div class="badge badge-suceess">Deliver</divf></h5>
+                                            <p>Order Date: ${order.created_at}</p>
+                                            <p>Total Amount: $${order.product_price_now}</p>
+                                            <div class="row">
+                                                <div class="col-3">
+                                                    <a class="btn btn-secondary" href="/public/product/?id=${order.product_ids}">View Product</a>
+                                                </div>
+                                                <div class="col-3">
+                                                    <a class="btn btn-secondary" href="/public/product/?id=${order.product_ids}">View Product</a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         `;
-                        category_list.innerHTML += category_card;
                     });
+                    console.log(response);
                 },
-                error: function(response) {
-                    category_list.innerHTML = `
-                        <div class="card w-100 d-flex align-items-center justify-content-center" style="min-height: 200px;">
-                            <div class="text-center fw-bold">
-                                ${response.responseJSON.message}
-                            </div>
-                        </div>
-                    `;
-                }
-            })
-        }
-        fetchCategory();
-
-        // View Order
-        let frmupdateCategory = document.getElementById("frmupdateCategory");
-        frmupdateCategory.addEventListener("submit", function(e) {
-            e.preventDefault();
-            let formData = new FormData(this);
-            let update_cat_id = formData.get("update_cat_id");
-            let update_cat_name = formData.get("update_cat_name");
-            let update_cat_description = formData.get("update_cat_description");
-
-            $.ajax({
-                url: '/api/v1.php',
-                type: 'POST',
-                data: JSON.stringify({
-                    action: "category_update",
-                    idCategory: update_cat_id,
-                    category_name: update_cat_name,
-                    category_description: update_cat_description
-                }),
-                success: function(response) {
-                    let updateCategoryAlert = document.getElementById("updateCategoryAlert");
-                    let updateCategoryAlertMsg = document.getElementById("updateCategoryAlertMsg");
-                    updateCategoryAlertMsg.textContent = response.message;
-                    updateCategoryAlert.classList.remove("alert-info", "alert-danger");
-                    updateCategoryAlert.classList.add("alert-success");
-                    updateCategoryAlert.classList.remove("d-none");
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                },
-                error: function(response) {
-                    let updateCategoryAlert = document.getElementById("updateCategoryAlert");
-                    let updateCategoryAlertMsg = document.getElementById("updateCategoryAlertMsg");
-                    updateCategoryAlertMsg.textContent = response.responseJSON.message;
-                    updateCategoryAlert.classList.remove("alert-info", "alert-success");
-                    updateCategoryAlert.classList.add("alert-danger");
-                    updateCategoryAlert.classList.remove("d-none");
-                    setTimeout(() => {
-                        updateCategoryAlert.classList.add("d-none");
-                    }, 2000);
+                error: function(xhr, status, error) {
+                    let response = xhr.responseJSON;
+                    // console.log("X: ", xhr);
+                    // console.log("Status: ", status);
+                    // console.log("Error: ", error);
                 }
             });
-        });
+        }
+        fetchOrderList();
+
+        // View Order
+        // let frmupdateCategory = document.getElementById("frmupdateCategory");
+        // frmupdateCategory.addEventListener("submit", function(e) {
+        //     e.preventDefault();
+        //     let formData = new FormData(this);
+        //     let update_cat_id = formData.get("update_cat_id");
+        //     let update_cat_name = formData.get("update_cat_name");
+        //     let update_cat_description = formData.get("update_cat_description");
+
+        //     $.ajax({
+        //         url: '/api/v1.php',
+        //         type: 'POST',
+        //         data: JSON.stringify({
+        //             action: "category_update",
+        //             idCategory: update_cat_id,
+        //             category_name: update_cat_name,
+        //             category_description: update_cat_description
+        //         }),
+        //         success: function(response) {
+        //             let updateCategoryAlert = document.getElementById("updateCategoryAlert");
+        //             let updateCategoryAlertMsg = document.getElementById("updateCategoryAlertMsg");
+        //             updateCategoryAlertMsg.textContent = response.message;
+        //             updateCategoryAlert.classList.remove("alert-info", "alert-danger");
+        //             updateCategoryAlert.classList.add("alert-success");
+        //             updateCategoryAlert.classList.remove("d-none");
+        //             setTimeout(() => {
+        //                 location.reload();
+        //             }, 2000);
+        //         },
+        //         error: function(response) {
+        //             let updateCategoryAlert = document.getElementById("updateCategoryAlert");
+        //             let updateCategoryAlertMsg = document.getElementById("updateCategoryAlertMsg");
+        //             updateCategoryAlertMsg.textContent = response.responseJSON.message;
+        //             updateCategoryAlert.classList.remove("alert-info", "alert-success");
+        //             updateCategoryAlert.classList.add("alert-danger");
+        //             updateCategoryAlert.classList.remove("d-none");
+        //             setTimeout(() => {
+        //                 updateCategoryAlert.classList.add("d-none");
+        //             }, 2000);
+        //         }
+        //     });
+        // });
     </script>
 </html>
