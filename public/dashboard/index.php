@@ -93,6 +93,9 @@ $role_type = $this_user->role_type;
     </body>
 
     <script>
+        let nav_home = document.getElementById("nav-home");
+        nav_home.classList.add("active");
+
         var page = 1;
         var paginate = 20;
         var search_name = "";
@@ -100,7 +103,11 @@ $role_type = $this_user->role_type;
         var search_code = "";
 
         let products_list = document.getElementById("product-list");
-
+        let product_search = document.getElementById("product_search");
+        product_search.addEventListener("keyup", function(e) {
+            search_name = e.target.value;
+            fetchProducts();
+        });
         function fetchProducts() {
             let params = new URLSearchParams({
                 product: true, 
@@ -157,7 +164,14 @@ $role_type = $this_user->role_type;
                     });
                 },
                 error: function(response) {
-                    console.log(response);
+                    let products = response.responseJSON;
+                    products_list.innerHTML = `
+                        <div class="mb-4 w-100 card text-center p-4">
+                            <span class="fw-bold">
+                                ${products.message}
+                            </span>
+                        </div>
+                    `;
                 }
             });
         }

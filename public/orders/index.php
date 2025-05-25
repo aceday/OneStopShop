@@ -192,13 +192,12 @@ $role_type = $this_user->role_type;
                                         <div class="text-start">
                                             <h5 class="fw-bolder">${order.product_name}<div class="badge badge-suceess">Deliver</divf></h5>
                                             <p>Order Date: ${order.created_at}</p>
-                                            <p>Total Amount: $${order.product_price_now}</p>
+                                            <p>Total Amount: ${order.product_price_now}</p>
                                             <div class="row">
-                                                <div class="col-3">
+                                                <div class="col">
                                                     <a class="btn btn-secondary" href="/public/product/?id=${order.product_ids}">View Product</a>
-                                                </div>
-                                                <div class="col-3">
                                                     <a class="btn btn-secondary" href="/public/product/?id=${order.product_ids}">View Product</a>
+                                                    <a class="btn btn-danger" href="/public/product/?id=${order.product_ids}">Cancel Order</a>
                                                 </div>
                                             </div>
                                         </div>
