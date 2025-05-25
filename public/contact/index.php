@@ -74,7 +74,7 @@ if (isset($_GET['id'])) {
                     <p class="lead">
                         This project created with
                         <ul class="lead">
-                            <li>PHP</li>
+                            <li>NativePHP</li>
                             <li>MySQL</li>
                             <li>Bootstrap</li>
                             <li>jQuery</li>
