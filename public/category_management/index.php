@@ -91,6 +91,7 @@ $role_type = $this_user->role_type;
     <div class="modal fade" id="AddCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmAddCategory">
+                <input type="hidden" name="action" id="action" value="category_create">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="AddCategoryTitle">Add Category</h5>
@@ -112,15 +113,15 @@ $role_type = $this_user->role_type;
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="text" name="add_cat_name" id="add_cat_name" class="form-control" placeholder="Name" required>
-                                <label for="add_cat_name">Name</label>
+                                <input type="text" name="add_category_name" id="add_category_name" class="form-control" placeholder="Name" required>
+                                <label for="add_category_name">Name</label>
                             </div>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <textarea name="add_cat_description" id="add_cat_description" class="form-control" placeholder="Description"></textarea>
-                                <label for="add_cat_description">Description</label>
+                                <textarea name="add_category_description" id="add_category_description" class="form-control" placeholder="Description"></textarea>
+                                <label for="add_category_description">Description</label>
                             </div>
                         </div>
                         <div class="modal-footer" id="AddCategoryFooter">
@@ -140,10 +141,11 @@ $role_type = $this_user->role_type;
     <div class="modal fade" id="updateCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:autox">
         <div class="modal-dialog" role="document">
             <form id="frmupdateCategory" method="POST">
+                <input type="hidden" name="action" id="action" value="category_update">
             <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="AddCategoryTitle">Update Category: <span id="update_cat_name_view"></span></h5>
-                            <input type="hidden" id="update_cat_id" name="update_cat_id">
+                            <input type="hidden" id="update_category_id" name="update_category_id">
                     </div>
                     <div class="modal-body py-4 px-6" id="AddCategoryBody">
                         <div class="mb-2">
@@ -162,15 +164,15 @@ $role_type = $this_user->role_type;
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="text" name="update_cat_name" id="update_cat_name" class="form-control" placeholder="Name" required>
-                                <label for="update_cat_name">Name</label>
+                                <input type="text" name="update_category_name" id="update_category_name" class="form-control" placeholder="Name" required>
+                                <label for="update_category_name">Name</label>
                             </div>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <textarea name="update_cat_description" id="update_cat_description" class="form-control" placeholder="Description"></textarea>
-                                <label for="update_cat_description">Description</label>
+                                <textarea name="update_category_description" id="update_category_description" class="form-control" placeholder="Description"></textarea>
+                                <label for="update_category_description">Description</label>
                             </div>
                         </div>
                         <div class="modal-footer" id="AddCategoryFooter">
@@ -190,6 +192,8 @@ $role_type = $this_user->role_type;
     <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmdeleteCategory">
+                <input type="hidden" name="action" id= "action" value="category_delete">
+                <input type="text" name="delete_category_id" id="delete_category_id" class="d-none">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="deleteCategoryTitle">
@@ -294,11 +298,9 @@ $role_type = $this_user->role_type;
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "category_create",
-                    category_name: add_cat_name,
-                    category_description: add_cat_description
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     let addCategoryAlert = document.getElementById("addCategoryAlert");
                     let addCategoryAlertMsg = document.getElementById("addCategoryAlertMsg");
@@ -337,10 +339,10 @@ $role_type = $this_user->role_type;
                     console.log(response);
                     let category = response.categories[0];
 
-                    document.getElementById("update_cat_id").value = category.idCategory;
-                    document.getElementById("update_cat_name").value = category.category_name;
+                    document.getElementById("update_category_id").value = category.idCategory;
+                    document.getElementById("update_category_name").value = category.category_name;
                     document.getElementById("update_cat_name_view").textContent = category.category_name;
-                    document.getElementById("update_cat_description").value = category.category_description;
+                    document.getElementById("update_category_description").value = category.category_description;
                 },
                 error: function(response) {
                     console.log(response);
@@ -353,19 +355,13 @@ $role_type = $this_user->role_type;
         frmupdateCategory.addEventListener("submit", function(e) {
             e.preventDefault();
             let formData = new FormData(this);
-            let update_cat_id = formData.get("update_cat_id");
-            let update_cat_name = formData.get("update_cat_name");
-            let update_cat_description = formData.get("update_cat_description");
 
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "category_update",
-                    idCategory: update_cat_id,
-                    category_name: update_cat_name,
-                    category_description: update_cat_description
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     let updateCategoryAlert = document.getElementById("updateCategoryAlert");
                     let updateCategoryAlertMsg = document.getElementById("updateCategoryAlertMsg");
@@ -405,8 +401,8 @@ $role_type = $this_user->role_type;
                 success: function(response) {
                     console.log(response);
                     let category = response.categories[0];
-                    document.getElementById("delete_cat_id").value = category.idCategory;
-                    document.getElementById("delete_cat_name").textContent = category.category_name;
+                    document.getElementById("delete_category_id").value = category.idCategory;
+                    document.getElementById("delete_category_name").textContent = category.category_name;
                     document.getElementById("delete_cat_name_view").textContent = category.category_name;
                 },
                 error: function(response) {
@@ -419,15 +415,13 @@ $role_type = $this_user->role_type;
         frmdeleteCategory.addEventListener("submit", function(e) {
             e.preventDefault();
             let formData = new FormData(this);
-            let delete_cat_id = formData.get("delete_cat_id");
 
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "category_delete",
-                    idCategory: delete_cat_id
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     let deleteCategoryAlert = document.getElementById("deleteCategoryAlert");
                     let deleteCategoryAlertMsg = document.getElementById("deleteCategoryAlertMsg");

@@ -5,74 +5,68 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 require_once __DIR__ . "/../base.php";
 
 use Firebase\JWT\JWT;
-
+use Firebase\JWT\Key;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $data = json_decode(file_get_contents("php://input"));
-
-    if (!isset($data->action)) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (!isset($_POST['action']) && !isset($data->action)) {
         echo json_encode(array(
             "status" => "error",
             "status_code" => 400,
-            "message" => "Bad Request"
+            "message" => "Invalid action"
         ));
         http_response_code(400);
         $pdo = null;
         exit;
     }
 
-    $action = $data->action;
+    $action = isset($data->action) ? $data->action : $_POST['action'];
 
-    if ($action == "login") {
-        if (!isset($data->username) || !isset($data->password)) {
+    // Login
+    if ($_POST['action'] == "login") {
+        if (!isset($_POST['auth_username']) || !isset($_POST['auth_password']) ||
+            empty($_POST['auth_username']) || empty($_POST['auth_password']))
+        {
             echo json_encode(array(
                 "status" => "error",
-                "status_code" => 401,
+                "status_code" => 400,
                 "message" => "Please input username and password"
             ));
-            http_response_code(401);
+            http_response_code(400);
             $pdo = null;
             exit;
         }
-        
-        $username = $data->username;
-        $password = $data->password;
-        $remember = isset($data->remember) ? $data->remember : 0;
-        
+
+        $username = $_POST['auth_username'];
+        $password = $_POST['auth_password'];
+
+        // Logging In
         try {
             $cur = $pdo->prepare("SELECT * FROM users WHERE username = :username");
             $cur->execute(array(
                 ":username" => $username
             ));
             $user = $cur->fetch(PDO::FETCH_ASSOC);
-            
             if ($user) {
-                $username = $user["username"];
-                $password_enc = $user["password"];
-                $user_id = $user["idUser"];
-                $role_type = $user["role_type"];
-                if (password_verify($password, $password_enc)) {
-                    $token_dec = array(
-                        "user_id" => $user_id,
-                        "username" => $username,
-                        "role_type" => $role_type,
+                if (password_verify($password, $user['password'])) {
+                    // Generate JWT Token
+                    $payload = array(
+                        "user_id" => $user['idUser'],
+                        "username" => $user['username'],
+                        "role_type" => $user['role_type'],
                         "iat" => time(),
-                        "exp" => time() + (60 * 60 * 24 * 1) // 1 day
+                        "exp" => time() + (60 * 60 * 24) // 1 day expiration
                     );
-                    
-                    $token = JWT::encode($token_dec, $jwt_secret_key, $jwt_algorithm);
+                    $jwt = JWT::encode($payload, $jwt_secret_key, $jwt_algorithm);
 
-                    // Set cookie if remember me is checked
-                    if ($remember) {
-                        setcookie("auth_token", $token, time() + (60 * 60 * 24 * 30), "/"); // 30 days
-                    } else {
-                        setcookie("auth_token", $token, time() + (60 * 60 * 24), "/"); // 1 day
-                    }
+                    // Set Cookie
+                    setcookie("auth_token", $jwt, time() + (60 * 60 * 24), "/", "", false, true);
+
                     echo json_encode(array(
                         "status" => "success",
                         "status_code" => 200,
                         "message" => "Login successful",
-                        "token" => $token
+                        "token" => $jwt
                     ));
                     http_response_code(200);
                     $pdo = null;
@@ -81,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     echo json_encode(array(
                         "status" => "error",
                         "status_code" => 401,
-                        "message" => "Invalid username or password"
+                        "message" => "Invalid password"
                     ));
                     http_response_code(401);
                     $pdo = null;
@@ -90,26 +84,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             } else {
                 echo json_encode(array(
                     "status" => "error",
-                    "status_code" => 401,
-                    "message" => "Invalid username or password"
+                    "status_code" => 404,
+                    "message" => "User not found"
                 ));
-                http_response_code(401);
+                http_response_code(404);
                 $pdo = null;
                 exit;
             }
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 500,
-                "message" => $e->getMessage()
+                "message" => "Internal Server Error: " . $e->getMessage()
             ));
             http_response_code(500);
             $pdo = null;
             exit;
         }
-
-    } else if ($action == "register" || $action == "user_create") {
-        if (!isset($data->username) || !isset($data->email) || !isset($data->password)) {
+    
+    // Register
+    } else if ($_POST['action'] == "register") {
+        if (!isset($_POST['reg_username']) || !isset($_POST['reg_email']) || !isset($_POST['reg_password']) ||
+            empty($_POST['reg_username']) || empty($_POST['reg_email']) || empty($_POST['reg_password']))
+        {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
@@ -120,144 +117,74 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
 
-        $username = $data->username;
-        $email = $data->email;
-        $password = $data->password;
+        $username = $_POST['reg_username'];
+        $email = $_POST['reg_email'];
+        $password = $_POST['reg_password'];
 
-        if (empty($username) || empty($email) || empty($password)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Username, email and password cannot be empty"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
+        // Check if user already exists
         try {
-            // Check user existence
-            $cur = $pdo->prepare("SELECT * FROM users WHERE username = :username");
+            $cur = $pdo->prepare("SELECT * FROM users WHERE username = :username OR email = :email");
             $cur->execute(array(
                 ":username" => $username,
+                ":email" => $email
             ));
-            $user_check = $cur->fetch(PDO::FETCH_ASSOC);
-            if ($user_check) {
+            $user = $cur->fetch(PDO::FETCH_ASSOC);
+            if ($user) {
                 echo json_encode(array(
                     "status" => "error",
                     "status_code" => 409,
-                    "message" => "Username already exists"
+                    "message" => "User already exists"
                 ));
                 http_response_code(409);
                 $pdo = null;
                 exit;
-            }
-
-            $cur = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)");
-            $cur->execute(array(
-                ":username" => $username,
-                ":email" => $email,
-                ":password" => password_hash($password, PASSWORD_BCRYPT)
-            ));
-
-            echo json_encode(array(
-                "status" => "success",
-                "status_code" => 201,
-                "message" => "User registered successfully"
-            ));
-            http_response_code(201);
-            $pdo = null;
-            exit;
-        } catch (PDOException $e) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 500,
-                "message" => $e->getMessage()
-            ));
-            http_response_code(500);
-            $pdo = null;
-            exit;
-        }
-    } else if ($action == "forgot_password") { 
-        if (!isset($data->email)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input email"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        $email = $data->email;
-
-        if (empty($email)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Email cannot be empty"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        try {
-            // Check user existence
-            $cur = $pdo->prepare("SELECT * FROM users WHERE email = :email");
-            $cur->execute(array(
-                ":email" => $email,
-            ));
-            $user_check = $cur->fetch(PDO::FETCH_ASSOC);
-            if (!$user_check) {
-                echo json_encode(array(
-                    "status" => "error",
-                    "status_code" => 404,
-                    "message" => "Email not found"
+            } else {
+                // Insert new user
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $cur = $pdo->prepare("INSERT INTO users (username, email, password, role_type) VALUES (:username, :email, :password, 'standard')");
+                $cur->execute(array(
+                    ":username" => $username,
+                    ":email" => $email,
+                    ":password" => $hashed_password
                 ));
-                http_response_code(404);
+
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "User registered successfully"
+                ));
+                http_response_code(201);
                 $pdo = null;
                 exit;
             }
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 500,
-                "message" => $e->getMessage()
+                "message" => "Internal Server Error: " . $e->getMessage()
             ));
             http_response_code(500);
             $pdo = null;
             exit;
         }
-
-        // Send reset password email soon :>
-    
-    } else if ($action == "logout") {
+    // Logout
+    } else if ($_POST['action'] == "logout") {
         // Clear the cookie
-        if (isset($_COOKIE["auth_token"])) {
-            unset($_COOKIE["auth_token"]);
-            setcookie("auth_token", "", time() - 3600, "/"); // 1 hour ago
-            echo json_encode(array(
-                "status" => "success",
-                "status_code" => 200,
-                "message" => "Logout successful"
-            ));
-            http_response_code(200);
-        } else {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 401,
-                "message" => "Not logged in"
-            ));
-            http_response_code(401);
-        }
+        setcookie("auth_token", "", time() - 3600, "/", "", false, true);
+        echo json_encode(array(
+            "status" => "success",
+            "status_code" => 200,
+            "message" => "Logout successful"
+        ));
+        http_response_code(200);
         $pdo = null;
         exit;
-
-    // Category
-    } else if ($action == "category_create") {
-        if (!isset($data->category_name)) {
+    
+    // Category: Create
+    } else if ($_POST['action'] == "category_create") {
+        if (!isset($_POST['add_category_name']) ||
+            empty($_POST['add_category_name']))
+        {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
@@ -268,19 +195,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
 
-        $category_name = $data->category_name;
-        $category_description = isset($data->category_description) ? $data->category_description : null;
-        
-        if (empty($category_name)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Category name cannot be empty"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
+        $category_name = $_POST['add_category_name'];
+        $category_description = $_POST['add_category_description'] ?? null;
+
 
         try {
             // Check category existence
@@ -323,8 +240,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pdo = null;
             exit;
         }
-    } else if ($action == "category_update") {
-        if (!isset($data->idCategory) || !isset($data->category_name)) {
+    
+    // Category: Update
+    } else if ($_POST['action'] == "category_update") {
+        if (!isset($_POST['update_category_id']) || !isset($_POST['update_category_name']) ||
+            empty($_POST['update_category_id']) || empty($_POST['update_category_name']))
+        {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
@@ -335,20 +256,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
 
-        $idCategory = $data->idCategory;
-        $category_name = $data->category_name;
-        $category_description = isset($data->category_description) ? $data->category_description : null;
-    
-        if (empty($idCategory) || empty($category_name)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Category id and name cannot be empty"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
+        $idCategory = $_POST['update_category_id'];
+        $category_name = $_POST['update_category_name'];
+        $category_description = $_POST['update_category_description'] ?? null;
 
         try {
             // Check category existence
@@ -405,21 +315,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pdo = null;
             exit;
         }
-    } else if ($action == "category_delete") {
-        if (!isset($data->idCategory)) {
+    } else if ($_POST['action'] == "category_delete") {
+        if (!isset($_POST['delete_category_id']) || empty($_POST['delete_category_id'])) {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
                 "message" => "Please input category id"
             ));
             http_response_code(400);
+            $pdo = null;
+            exit;
         }
+        $idCategory = $_POST['delete_category_id'];
 
         $sql_cmd = "DELETE FROM categories WHERE idCategory = :idCategory";
 
         // Execute
         $cur = $pdo->prepare($sql_cmd);
-        $cur->bindValue(":idCategory", $data->idCategory);
+        $cur->bindValue(":idCategory", $idCategory);
         $cur->execute();
 
         if ($cur->rowCount() > 0) {
@@ -441,52 +354,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pdo = null;
             exit;
         }
-    } else if ($action == "product_create") {
-        if (
-            !isset($data->code) ||
-            !isset($data->name) || 
-            !isset($data->category) || 
-            !isset($data->price_now) || 
-            !isset($data->price_original) ||
-            !isset($data->description) ||
-            !isset($data->quantity)) {
+
+    } else if ($_POST['action'] == "product_create") {
+        if (!isset($_POST['add_product_code']) ||
+            !isset($_POST['add_product_name']) ||
+            !isset($_POST['add_product_category']) ||
+            !isset($_POST['add_product_price_now']) ||
+            !isset($_POST['add_product_price_original']) ||
+            !isset($_POST['add_product_description']) ||
+            !isset($_POST['add_product_quantity'])
+        ){
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
-                "message" => "Please fill up for the following fields"
+                "message" => "Please input product code, name, category, price now, price original, description and quantity"
             ));
             http_response_code(400);
             $pdo = null;
             exit;
         }
-
-        $code = $data->code;
-        $name = $data->name;
-        $category = $data->category;
-        $price_now = $data->price_now;
-        $price_original = $data->price_original;
-        $description = isset($data->description) ? $data->description : null;
-        $quantity = $data->quantity;
-        // $image = isset($data->image) ? $data->image : null;
-        // $status = isset($data->status) ? $data->status : null;
-
-        if (
-            empty($code) ||
-            empty($name) ||
-            empty($category) ||
-            empty($price_now) ||
-            empty($price_original) ||
-            empty($description) ||
-            empty($quantity)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please fill up for the following fields"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
+        $code = $_POST['add_product_code'];
+        $name = $_POST['add_product_name'];
+        $category = $_POST['add_product_category'];
+        $price_now = $_POST['add_product_price_now'];
+        $price_original = $_POST['add_product_price_original'];
+        $description = $_POST['add_product_description'];
+        $quantity = $_POST['add_product_quantity'];
 
         try {
             // Check product existence
@@ -507,6 +400,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $pdo = null;
                 exit;
             }
+
             $cur = $pdo->prepare("INSERT INTO products (product_code, product_name, product_category, product_price_now, product_price_original, product_description, product_quantity)
                                 VALUES (:code, :name, :category, :price_now, :price_original, :description, :quantity)");
             $cur->execute(array(
@@ -518,6 +412,69 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ":description" => $description,
                 ":quantity" => $quantity
             ));
+
+            // Image
+            $image_path = "";
+            $extensions = ["jpg", "jpeg", "png", "gif"];
+
+            $image_name = $_FILES['add_product_image']['name'] ?? null;
+            $image_tmp_name = $_FILES['add_product_image']['tmp_name'] ?? null;
+            $image_type = $_FILES['add_product_image']['type'] ?? null;
+            $image_size = $_FILES['add_product_image']['size'] ?? null;
+
+            $image_file_type = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
+
+            // make folder
+            if (!is_dir("../data/image/" . $idProduct)) {
+                mkdir("../data/image/" . $idProduct, 0777, true);
+            }
+            $db_media = "../data/image/" . $idProduct . "/";
+
+            if (!in_array($image_file_type, $extensions)) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 400,
+                    "message" => "Invalid image file type"
+                ));
+                http_response_code(400);
+                $pdo = null;
+                exit;
+            }
+
+            // Upload image
+            $target_path = $db_media . $image_name;
+
+            if (!move_uploaded_file($image_tmp_name, $target_path)) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 500,
+                    "message" => "Failed to move uploaded file"
+                ));
+                http_response_code(500);
+                $pdo = null;
+                exit;
+            }
+
+            // Save to DB
+            $product_image = "/data/image/" . $idProduct . "/" . $image_name;
+
+            $cur = $pdo->prepare("UPDATE products
+                                    SET product_image = :product_image
+                                    WHERE product_code = :code");
+            $cur->execute(array(
+                ":product_image" => $product_image,
+                ":code" => $code
+            ));
+            if ($cur->rowCount() <= 0) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 500,
+                    "message" => "Failed to save product image"
+                ));
+                http_response_code(500);
+                $pdo = null;
+                exit;
+            }
             echo json_encode(array(
                 "status" => "success",
                 "status_code" => 201,
@@ -536,59 +493,50 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pdo = null;
             exit;
         }
-    } else if ($action == "product_update") {
-        if (
-            !isset($data->id) ||
-            !isset($data->code) ||
-            !isset($data->name) || 
-            !isset($data->category) || 
-            !isset($data->price_now) || 
-            !isset($data->price_original) ||
-            !isset($data->description) ||
-            !isset($data->quantity)) {
+    } else if ($_POST['action'] == "product_update") {
+        if (!isset($_POST['update_product_id']) || !isset($_POST['update_product_name']) ||
+            empty($_POST['update_product_id']) || empty($_POST['update_product_name']))
+        {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
-                "message" => "Please fill up for the following fields"
+                "message" => "Please input product id and name"
             ));
             http_response_code(400);
             $pdo = null;
             exit;
         }
 
-        $idProduct = $data->id;
-        $code = $data->code;
-        $name = $data->name;
-        $category = $data->category;
-        $price_now = $data->price_now;
-        $price_original = $data->price_original;
-        $description = isset($data->description) ? $data->description : null;
-        $quantity = $data->quantity;
+        $idProduct = $_POST['update_product_id'];
+        $product_code = $_POST['update_product_code'] ?? null;
+        $product_name = $_POST['update_product_name'];
+        $product_category = $_POST['update_product_category'];
+        $product_price_now = $_POST['update_product_price_now'];
+        $product_price_original = $_POST['update_product_price_original'];
+        $product_description = isset($_POST['update_product_description']) ? $_POST['update_product_description'] : null;
+        $product_quantity = $_POST['update_product_quantity'];
+        $product_product_image = $_POST['update_product_image'] ?? null;
 
-        if (
-            empty($idProduct) ||
-            empty($code) ||
-            empty($name) ||
-            empty($category) ||
-            empty($price_now) ||
-            empty($price_original) ||
-            empty($description) ||
-            empty($quantity)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please fill up for the following fields"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
+        // echo json_encode(array(
+        //     "status" => "debug",
+        //     "status_code" => 200,
+        //     "message" => "Debugging product update",
+        //     "data" => array(
+        //         "idProduct" => $idProduct,
+        //         "product_code" => $product_code,
+        //         "product_name" => $product_name,
+        //         "product_category" => $product_category,
+        //         "product_price_now" => $product_price_now,
+        //         "product_price_original" => $product_price_original,
+        //         "product_description" => $product_description,
+        //         "product_quantity" => $product_quantity,
+        //         "product_image" => $product_product_image
+        //     )
+        //     ));
+        //     exit;
         try {
             // Check product existence
-            $cur = $pdo->prepare("SELECT *
-                                FROM products
-                                WHERE idProduct = :idProduct");
+            $cur = $pdo->prepare("SELECT * FROM products WHERE idProduct = :idProduct");
             $cur->execute(array(
                 ":idProduct" => $idProduct,
             ));
@@ -604,20 +552,75 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 exit;
             }
             
-            // Update product
             $cur = $pdo->prepare("UPDATE products
-                                    SET product_code = :code, product_name = :name, product_category = :category, product_price_now = :price_now, product_price_original = :price_original, product_description = :description, product_quantity = :quantity
+                                    SET product_name = :product_name, 
+                                        product_description = :product_description, 
+                                        product_price_now = :product_price_now, 
+                                        product_price_original = :product_price_original, 
+                                        product_quantity = :product_quantity,
+                                        product_code = :product_code,
+                                        product_category = :product_category,
+                                        product_image = :product_image
                                     WHERE idProduct = :idProduct");
+
+
+            // Image
+            $image_path = "";
+            $extensions = ["jpg", "jpeg", "png", "gif"];
+
+            $image_name = $_FILES['update_product_image']['name'] ?? null;
+            $image_tmp_name = $_FILES['update_product_image']['tmp_name'] ?? null;
+            $image_type = $_FILES['update_product_image']['type'] ?? null;
+            $image_size = $_FILES['update_product_image']['size'] ?? null;
+
+            $image_file_type = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
+
+            // make folder
+            if (!is_dir("../data/image/" . $idProduct)) {
+                mkdir("../data/image/" . $idProduct, 0777, true);
+            }
+            $db_media = "../data/image/" . $idProduct . "/";
+
+            if (!in_array($image_file_type, $extensions)) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 400,
+                    "message" => "Invalid image file type"
+                ));
+                http_response_code(400);
+                $pdo = null;
+                exit;
+            }
+
+            // Upload image
+            $target_path = $db_media . $image_name;
+
+            if (!move_uploaded_file($image_tmp_name, $target_path)) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 500,
+                    "message" => "Failed to move uploaded file"
+                ));
+                http_response_code(500);
+                $pdo = null;
+                exit;
+            }
+
+            // Save to DB
+            $product_image = "/data/image/" . $idProduct . "/" . $image_name;
+
             $cur->execute(array(
-                ":code" => $code,
-                ":name" => $name,
-                ":category" => $category,
-                ":price_now" => $price_now,
-                ":price_original" => $price_original,
-                ":description" => $description,
-                ":quantity" => $quantity,
-                ":idProduct" => $idProduct
+                ":product_name" => $product_name,
+                ":product_description" => $product_description,
+                ":product_price_now" => $product_price_now,
+                ":product_price_original" => $product_price_original,
+                ":product_quantity" => $product_quantity,
+                ":idProduct" => $idProduct,
+                ":product_code" => $product_code,
+                ":product_category" => $product_category,
+                ":product_image" => $product_image
             ));
+
             // Changes by afftected row
             if ($cur->rowCount() > 0) {
                 echo json_encode(array(
@@ -626,6 +629,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "Product updated successfully"
                 ));
                 http_response_code(200);
+                $pdo = null;
+                exit;
             } else {
                 echo json_encode(array(
                     "status" => "error",
@@ -633,9 +638,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "message" => "No changes made"
                 ));
                 http_response_code(403);
+                $pdo = null;
+                exit;
             }
-            $pdo = null;
-            exit;
         } catch (PDOException $e) {
             echo json_encode(array(
                 "status" => "error",
@@ -646,669 +651,249 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pdo = null;
             exit;
         }
-        $pdo = null;
-        exit;
-    } else if ($action == "product_delete") {
-        if (!isset($data->id) && !isset($data->code)) {
+    } else if ($_POST['action'] == "product_delete") {
+        if (!isset($_POST['delete_product_id']) || empty($_POST['delete_product_id'])) {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
                 "message" => "Please input product id"
             ));
             http_response_code(400);
+            $pdo = null;
+            exit;
         }
+        $idProduct = $_POST['delete_product_id'];
 
-        $idProduct = isset($data->id) ? $data->id : null;
-        $code = isset($data->code) ? $data->code : null;
+        $sql_cmd = "DELETE FROM products WHERE idProduct = :idProduct";
 
-        try {
-            // Check product existence
-            $cur = $pdo->prepare("SELECT *
-                                FROM products
-                                WHERE idProduct = :idProduct OR product_code = :code");
-            $cur->execute(array(
-                ":idProduct" => $idProduct,
-                ":code" => $code
+        // Execute
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idProduct", $idProduct);
+        $cur->execute();
+
+        if ($cur->rowCount() > 0) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "Product deleted successfully"
             ));
-            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-            if (!$product_check) {
+            http_response_code(200);
+            $pdo = null;
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "Product not found"
+            ));
+            http_response_code(404);
+            $pdo = null;
+            exit;
+        }
+    } else if ($_POST['action'] == "checkout-make") {
+        // if (!isset($_POST['checkout_cart_id']) && empty($_POST['checkout_cart_id']) 
+            
+        // ) {
+        //     echo json_encode(array(
+        //         "status" => "error",
+        //         "status_code" => 400,
+        //         "message" => "Please input cart id"
+        //     ));
+        //     http_response_code(400);
+        //     $pdo = null;
+        //     exit;
+        // }
+        // $cart_id = $_POST['checkout_cart_id'];
+        
+        // echo json_encode(array(
+        //     "status" => "success",
+        //     "status_code" => 200,
+        //     "message" => "Checkout successful"
+        // ));
+        // http_response_code(200);
+        // $pdo = null;
+        if (isset($_COOKIE['auth_token'])) {
+            try {
+                $this_user = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
+            } catch (Exception $e) {
                 echo json_encode(array(
                     "status" => "error",
-                    "status_code" => 404,
-                    "message" => "Product not found"
+                    "status_code" => 401,
+                    "message" => "Invalid token"
                 ));
-                http_response_code(404);
+                http_response_code(401);
                 $pdo = null;
                 exit;
             }
-
-            // Delete product
-            $cur = $pdo->prepare("DELETE FROM products WHERE idProduct = :idProduct OR product_code = :code");
-            $cur->execute(array(
-                ":idProduct" => $idProduct,
-                ":code" => $code
-            ));
-            // Changes by afftected row
-            if ($cur->rowCount() > 0) {
-                echo json_encode(array(
-                    "status" => "success",
-                    "status_code" => 200,
-                    "message" => "Product deleted successfully"
-                ));
-                http_response_code(200);
-            } else {
-                echo json_encode(array(
-                    "status" => "error",
-                    "status_code" => 403,
-                    "message" => "No changes made"
-                ));
-                http_response_code(403);
-            }
-
-        } catch (PDOException $e) {
+        } else {
             echo json_encode(array(
                 "status" => "error",
-                "status_code" => 500,
-                "message" => $e->getMessage()
+                "status_code" => 401,
+                "message" => "Unauthorized access"
             ));
-            http_response_code(500);
+            http_response_code(401);
             $pdo = null;
             exit;
         }
 
-    // Users
+        $user_id = $this_user->user_id;
+        $role_type = $this_user->role_type;
 
-    /**
-     * user_create will merged at `register`
-     * 
-     */
-    } else if ($action == "user_update") {
-        if (!isset($data->idUser)) {
+        if ($role_type != 'standard') {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 403,
-                "message" => "User id is not present"
+                "message" => "Forbidden: Only standard users can make purchases"
             ));
             http_response_code(403);
             $pdo = null;
             exit;
         }
 
-        $id = $data->idUser;
-        $username = isset($data->username) ? $data->username : null;
-        $email = isset($data->email) ? $data->email : null;
-        $password = isset($data->password) ? $data->password : null;
-        $status = isset($data->status) ? $data->status : null;
-        $role_type = isset($data->role_type) ? $data->role_type : null;
-
-        if (empty($id)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "User id cannot be empty"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        try {
-            // Update User
-            $cur = $pdo->prepare("UPDATE users
-                                    SET username = :username, email = :email, password = :password, status = :status, role_type = :role_type
-                                    WHERE idUser = :idUser");
-            $cur->execute(array(
-                ":username" => $username,
-                ":email" => $email,
-                ":password" => password_hash($password, PASSWORD_BCRYPT),
-                ":status" => $status,
-                ":role_type" => $role_type,
-                ":idUser" => $id
-            ));
-            
-            // Check if any changes
-            if ($cur->rowCount() > 0) {
-                echo json_encode(array(
-                    "status" => "success",
-                    "status_code" => 200,
-                    "message" => "User updated successfully"
-                ));
-                http_response_code(200);
-                $pdo = null;
-                exit;
-            } else {
-                echo json_encode(array(
-                    "status" => "error",
-                    "status_code" => 403,
-                    "message" => "No changes made"
-                ));
-                http_response_code(403);
-                $pdo = null;
-                exit;
-            }
-        } catch (PDOException $e) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 500,
-                "message" => $e->getMessage()
-            ));
-            http_response_code(500);
-            $pdo = null;
-            exit;
-        }
-    } else if ($action == "user_delete") {
-        if (!isset($data->idUser)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input user id"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        $sql_cmd = "DELETE FROM users WHERE idUser = :idUser";
-
-        // Execute
-        $cur = $pdo->prepare($sql_cmd);
-        $cur->bindValue(":idUser", $data->idUser);
-        $cur->execute();
-
-        if ($cur->rowCount() > 0) {
-            echo json_encode(array(
-                "status" => "success",
-                "status_code" => 200,
-                "message" => "User deleted successfully"
-            ));
-            http_response_code(200);
-            $pdo = null;
-            exit;
-        } else {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 404,
-                "message" => "User not found"
-            ));
-            http_response_code(404);
-            $pdo = null;
-            exit;
-        }
-    } else if ($action == "cart_add") {
-        if (!isset($data->idUser) || !isset($data->idProduct) || !isset($data->quantity)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input user id and product id"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        $idUser = $data->idUser;
-        $idProduct = $data->idProduct;
-        $quantity = $data->quantity;
-
-        if (empty($idUser) || empty($idProduct)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "User id and product id cannot be empty"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        try {
-            // Check product existence
-            $cur = $pdo->prepare("SELECT *
-                                FROM products
-                                WHERE idProduct = :idProduct");
-            $cur->execute(array(
-                ":idProduct" => $idProduct,
-            ));
-            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-            if (!$product_check) {
-                echo json_encode(array(
-                    "status" => "error",
-                    "status_code" => 404,
-                    "message" => "Product not found"
-                ));
-                http_response_code(404);
-                $pdo = null;
-                exit;
-            }
-
-            // Check the quantity limit
-
-            // Add to cart
-            $cur = $pdo->prepare("INSERT INTO cart_data (user_id, product_id, quantity) VALUES (:idUser, :idProduct, :quantity)");
-            $cur->execute(array(
-                ":idUser" => $idUser,
-                ":idProduct" => $idProduct,
-                ":quantity" => $quantity
-            ));
-            echo json_encode(array(
-                "status" => "success",
-                "status_code" => 201,
-                "message" => "Product added to cart successfully"
-            ));
-            http_response_code(201);
-            $pdo = null;
-            exit;
-        } catch (PDOException $e) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 500,
-                "message" => $e->getMessage()
-            ));
-            http_response_code(500);
-            $pdo = null;
-            exit;
-        }
-    
-
-
-    } else if ($action == "cart_update") {
-        if (!isset($data->idUser) || !isset($data->idProduct) || !isset($data->quantity) || !isset($data->idCart)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input user id and product id"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        $idUser = $data->idUser;
-        $idProduct = $data->idProduct;
-        $quantity = $data->quantity;
-        $idCart = $data->idCart;
-        if (empty($idUser) || empty($idProduct) || empty($idCart)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "User id, product id and cart id cannot be empty"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        try {
-            // Check product existence
-            $cur = $pdo->prepare("SELECT *
-                                FROM products
-                                WHERE idProduct = :idProduct");
-            $cur->execute(array(
-                ":idProduct" => $idProduct,
-            ));
-            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-            if (!$product_check) {
-                echo json_encode(array(
-                    "status" => "error",
-                    "status_code" => 404,
-                    "message" => "Product not found"
-                ));
-                http_response_code(404);
-                $pdo = null;
-                exit;
-            }
-
-            // Check the quantity limit
-
-            // Update cart
-            $cur = $pdo->prepare("UPDATE cart_data
-                                    SET quantity = :quantity
-                                    WHERE idCart = :idCart");
-            $cur->execute(array(
-                ":quantity" => $quantity,
-                ":idCart" => $idCart
-            ));
-            
-            // Changes by afftected row
-            if ($cur->rowCount() > 0) {
-                echo json_encode(array(
-                    "status" => "success",
-                    "status_code" => 200,
-                    "message" => "Cart updated successfully"
-                ));
-                http_response_code(200);
-                $pdo = null;
-                exit;
-            } else {
-                echo json_encode(array(
-                    "status" => "error",
-                    "status_code" => 403,
-                    "message" => "No changes made"
-                ));
-                http_response_code(403);
-                $pdo = null;
-                exit;
-            }
-        } catch (PDOException $e) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 500,
-                "message" => $e->getMessage()
-            ));
-            http_response_code(500);
-            $pdo = null;
-            exit;
-        }
-    } if ($action == "cart_delete") {
-        if (!isset($data->idCart)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input cart id"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        $sql_cmd = "DELETE FROM cart_data WHERE idCart = :idCart";
-
-        // Execute
-        $cur = $pdo->prepare($sql_cmd);
-        $cur->bindValue(":idCart", $data->idCart);
-        $cur->execute();
-
-        if ($cur->rowCount() > 0) {
-            echo json_encode(array(
-                "status" => "success",
-                "status_code" => 200,
-                "message" => "Cart deleted successfully"
-            ));
-            http_response_code(200);
-            $pdo = null;
-            exit;
-        } else {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 404,
-                "message" => "Cart not found"
-            ));
-            http_response_code(404);
-            $pdo = null;
-            exit;
-        }
-    } else if ($action == "checkout-make") {
-        if (
-            !isset($data->name) || 
-            !isset($data->address) ||
-            !isset($data->deliver_type) ||
-            !isset($data->payment_type)
-        ) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Missing input"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        if (empty($data->name) ||
-            empty($data->address) ||
-            empty($data->deliver_type) ||
-            empty($data->payment_type)
-        ) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please fill up for the following fields"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        if (!isset($data->products) && !isset($data->carts)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input products or carts"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        if (isset($data->products) && isset($data->carts)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input either products or carts"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        if (isset($data->products) && !isset($data->carts) && isset($data->quantity)) {
-            // Check product quantity
-            $sql_cmd = "SELECT
-                            *
-                        FROM
-                            products p
-                        WHERE
-                            p.idProduct = :idProduct
-            ";
-            $cur = $pdo->prepare($sql_cmd);
-            $cur->bindValue(":idProduct", $data->products);
-            $cur->execute();
-            $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-            // echo json_encode(array(
-            //     "status" => "success",
-            //     "status_code" => 200,
-            //     "message" => "Product quantity is enough",
-            //     "products" => $product_check
-            // ));
-            // $pdo = null;
-            // exit;
-            // if ($product_check['product_quantity'] < $data->quantity) {
-            //     echo json_encode(array(
-            //         "status" => "error",
-            //         "status_code" => 400,
-            //         "message" => "Product quantity is not enough"
-            //     ));
-            //     http_response_code(400);
-            //     $pdo = null;
-            // exit;
-            // }
-
-            // Checking quantity
-            $sql_cmd = "SELECT
-                            *
-                        FROM
-                            products p
-                        WHERE
-                            p.idProduct = :idProduct
-            ";
-            $cur = $pdo->prepare($sql_cmd);
-            $cur->bindValue(":idProduct", $data->products);
-            $cur->execute();
-            $product_check_qty = $cur->fetch(PDO::FETCH_ASSOC);
-            if ($product_check_qty['product_quantity'] == 0) {
+        if ($_POST['checkout_mode'] == "buy") {
+            if (!isset($_POST['product_id']) || empty($_POST['product_id']) ||
+                !isset($_POST['product_quantity']) || empty($_POST['product_quantity'])) {
                 echo json_encode(array(
                     "status" => "error",
                     "status_code" => 400,
-                    "message" => "Out of stock"
+                    "message" => "Please input product id and quantity"
                 ));
                 http_response_code(400);
                 $pdo = null;
                 exit;
-            } else if ($product_check_qty['product_quantity'] < $data->quantity) {
-                echo json_encode(array(
-                    "status" => "error",
-                    "status_code" => 400,
-                    "message" => "Product quantity is not enough"
-                ));
-                http_response_code(400);
-                $pdo = null;
-                exit;
-            } else {
-                // Then checkout/order now
-
-                // begin transaction
-
-                $pdo->beginTransaction();
-
-                try {
-                    $sql_cmd = "INSERT INTO orders
-                                    (product_ids, `status`, `name`, `address`, deliver_type, payment_type, contact_no, user_id)
-                                VALUES
-                                    (:product_ids, :status, :name, :address, :deliver_type, :payment_type, :contact_no, :user_id)
-                    ";
-                    $cur = $pdo->prepare($sql_cmd);
-                    $cur->bindValue(":product_ids", $data->products);
-                    $cur->bindValue(":status", "pending");
-                    $cur->bindValue(":name", $data->name);
-                    $cur->bindValue(":address", $data->address);
-                    $cur->bindValue(":deliver_type", $data->deliver_type);
-                    $cur->bindValue(":payment_type", $data->payment_type);
-                    $cur->bindValue(":contact_no", $data->contact_no);
-                    $cur->bindValue(":user_id", $data->idUser);
-
-                    $cur->execute();
-
-                    // Then decrase the product quantity
-                    $sql_cmd = "UPDATE products
-                                    SET product_quantity = product_quantity - :quantity
-                                WHERE idProduct = :idProduct";
-                    $cur = $pdo->prepare($sql_cmd);
-                    $cur->bindValue(":quantity", $data->quantity);
-                    $cur->bindValue(":idProduct", $data->products);
-                    $cur->execute();
-
-                    echo json_encode(array(
-                        "status" => "success",
-                        "status_code" => 201,
-                        "message" => "Order created successfully"
-                    ));
-
-                    http_response_code(201);
-
-                    // $pdo->rollBack();
-                    $pdo->commit();
-
-                } catch (PDOException $e) {
-                    // Rollback transaction
-                    $pdo->rollBack();
-                    echo json_encode(array(
-                        "status" => "error",
-                        "status_code" => 500,
-                        "message" => $e->getMessage()
-                    ));
-                    http_response_code(500);
-                    $pdo = null;
-                    exit;
-                }
-
             }
-        }
+            $pdo->beginTransaction();
+            try {
 
-        if (isset($data->carts) && !isset($data->products)) {
-            $carts = $data->carts;
+                $customer_name = $_POST['customer_name'];
+                $customer_address = $_POST['customer_address'];
+                $customer_phone = $_POST['customer_phone'];
+                $delivery_type = $_POST['delivery_type'];
+                $payment_type = $_POST['payment_type'];
+        
+                $product_id = $_POST['product_id'];
+                $product_quantity = $_POST['product_quantity'];
 
-            // Checking the carts available
-            $cart_ids = explode(";", $carts);
-            foreach($cart_ids as $cart_id) {
-                $sql_cmd = "SELECT
-                                *
-                            FROM
-                                cart_data c
-                            WHERE
-                                c.idCart = :idCart
-                ";
+                $sql_cmd = "SELECT *
+                            FROM products
+                            WHERE idProduct = :idProduct";
                 $cur = $pdo->prepare($sql_cmd);
-                $cur->bindValue(":idCart", $cart_id);
+                $cur->bindValue(":idProduct", $product_id, PDO::PARAM_INT);
                 $cur->execute();
-                $cart_check = $cur->fetch(PDO::FETCH_ASSOC);
-                if (!$cart_check) {
+                $product = $cur->fetch(PDO::FETCH_ASSOC);
+                if (!$product) {
                     echo json_encode(array(
                         "status" => "error",
                         "status_code" => 404,
-                        "message" => "This cart id was not found"
+                        "message" => "Product not found"
                     ));
                     http_response_code(404);
                     $pdo = null;
                     exit;
                 }
-                // Check the product quantity
-                $sql_cmd = "SELECT
-                                *
-                            FROM
-                                products p
-                            WHERE
-                                p.idProduct = :idProduct
-                ";
-                $cur = $pdo->prepare($sql_cmd);
-                $cur->bindValue(":idProduct", $cart_check['product_id']);
-                $cur->execute();
-                $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-                if ($product_check['product_quantity'] < $cart_check['quantity']) {
+                $product_quantity = $_POST['product_quantity'];
+                if ($product['product_quantity'] < $product_quantity) {
                     echo json_encode(array(
                         "status" => "error",
                         "status_code" => 400,
-                        "message" => "Product quantity is not enough"
+                        "message" => "Insufficient product quantity"
                     ));
                     http_response_code(400);
                     $pdo = null;
                     exit;
-                } else {
-                    // Decrease the products
-                    $sql_cmd = "SELECT
-                                    *
-                                FROM
-                                    products p
-                                WHERE
-                                    p.idProduct = :idProduct";
-                    $cur = $pdo->prepare($sql_cmd);
-                    $cur->bindValue(":idProduct", $cart_check['product_id']);
-                    $cur->execute();
-                    $product_check = $cur->fetch(PDO::FETCH_ASSOC);
-
-                    // foreach 
-                    // echo json_encode(array(
-                    //     "status" => "success",
-                    //     "status_code" => 200,
-                    //     "message" => "Product quantity is enough",
-                    //     "products" => $product_check
-                    // ));
                 }
-                    
 
+                // Create order so
+
+                $cur = $pdo->prepare("INSERT INTO orders (customer_name, customer_address, customer_phone, deliver_type, payment_type, `status`, user_id, checkout_type, product_quantity, product_ids)
+                                        VALUES (:customer_name, :customer_address, :customer_phone, :delivery_type, :payment_type, 'pending', :user_id, :checkout_type, :product_quantity, :product_id)");
+                $cur->execute(array(
+                    ":customer_name" => $customer_name,
+                    ":customer_address" => $customer_address,
+                    ":customer_phone" => $customer_phone,
+                    ":delivery_type" => $delivery_type,
+                    ":payment_type" => $payment_type,
+                    ":user_id" => $user_id,
+                    ":checkout_type" => "buy",
+                    ":product_quantity" => $product_quantity,
+                    ":product_id" => $product_id
+                ));
+                $order_id = $pdo->lastInsertId();
+
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Order created successfully",
+                    "order_id" => $order_id,
+                    "product" => array(
+                        "idProduct" => $product['idProduct'],
+                        "product_code" => $product['product_code'],
+                        "product_name" => $product['product_name'],
+                        "product_price_now" => $product['product_price_now'],
+                        "product_price_original" => $product['product_price_original'],
+                        "product_description" => $product['product_description'],
+                        "product_quantity" => $product_quantity,
+                        "total_price" => $product['product_price_now'] * $product_quantity,
+                        "product_quantity" => $product['product_quantity'],
+                        "product_quan_set" => $product_quantity,
+                    )
+                ));
+
+                // Then decrease the product quantity
+                $new_quantity = $product['product_quantity'] - $product_quantity;
+                $cur = $pdo->prepare("UPDATE products
+                                        SET product_quantity = :new_quantity
+                                        WHERE idProduct = :idProduct");
+                $cur->execute(array(
+                    ":new_quantity" => $new_quantity,
+                    ":idProduct" => $product_id
+                ));
+                if ($cur->rowCount() <= 0) {
+                    echo json_encode(array(
+                        "status" => "error",
+                        "status_code" => 500,
+                        "message" => "Failed to update product quantity"
+                    ));
+                    http_response_code(500);
+                    $pdo = null;
+                    exit;
                 }
+                // $pdo->rollBack();
+                $pdo->commit();
+
+            } catch (PDOException $e) {
+            $pdo->rollBack();    
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 500,
+                    "message" => $e->getMessage()
+                ));
+                http_response_code(500);
+                $pdo = null;
+                exit;
             }
-
-        $user_id = $data->idUser;
-        $name = $data->name;
-        $address = $data->address;
-        $deliver_type = $data->deliver_type;
-        $payment_type = $data->payment_type;
-        
-    }
-
-    else
-    
-    
-    {
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Invalid checkout mode"
+            ));
+            http_response_code(400);
+            $pdo = null;
+            exit;
+        }
+        exit;
+    } else {
         echo json_encode(array(
             "status" => "error",
             "status_code" => 400,
-            "message" => "Bad Request"
+            "message" => "Invalid action"
         ));
         http_response_code(400);
         $pdo = null;
         exit;
     }
+
 } else if ($_SERVER["REQUEST_METHOD"] === "GET") {
     if (isset($_GET['category'])) {
         $sql_cmd = "SELECT *

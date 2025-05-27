@@ -48,7 +48,6 @@ $role_type = $this_user->role_type;
                 <div class="text-center text-white">
                     <h1 class="display-4 fw-bolder">Shop in style</h1>
                     <p class="lead fw-normal text-white-50 mb-0"><?php echo $project_description?></p>
-                    <?php echo $role_type?>
                 </div>
             </div>
         </header>
@@ -134,13 +133,16 @@ $role_type = $this_user->role_type;
                         let product_view_original = product_price_now > product_price_original
                             ? `<span class=\"text-muted text-decoration-line-through\">₱${product_price_original}</span>`
                             : ``;
+                        let product_image = product.product_image
+                            ? product.product_image
+                            : "https://dummyimage.com/450x300/dee2e6/6c757d.jpg";
                         products_list.innerHTML += `
                             <div class="col mb-5">
                                 <div class="card h-100">
                                     <!-- Sale badge-->
                                     <!-- <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div> -->
                                     <!-- Product image-->
-                                    <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+                                    <img class="card-img-top" src="${product_image}" alt="..." />
                                     <!-- Product details-->
                                     <div class="card-body p-4">
                                         <div class="text-center">

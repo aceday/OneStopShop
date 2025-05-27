@@ -32,6 +32,7 @@ $page_name = "Register";
                         </h2>    
                     </div>
                     <form class="p-4" id="frmRegister">
+                        <input type="hidden" name="action" id="action" value="register" />
                         <div class="alert d-none alert-info" id="frmRegister_alert">
                             <span id="frmRegister_alert_message"></span>
                         </div>
@@ -40,8 +41,8 @@ $page_name = "Register";
                                 @
                             </div>
                             <div data-mdb-input-init class="form-floating">
-                                <input type="text" id="auth_username" name="auth_username"class="form-control" placeholder="Username" />
-                                <label class="form-label" for="auth_username">Username</label>
+                                <input type="text" id="reg_username" name="reg_username"class="form-control" placeholder="Username" />
+                                <label class="form-label" for="reg_username">Username</label>
                             </div>
                         </div>
 
@@ -50,8 +51,8 @@ $page_name = "Register";
                                 @
                             </div>
                             <div data-mdb-input-init class="form-floating">
-                                <input type="email" id="auth_email" name="auth_email" class="form-control" placeholder="Email" />
-                                <label class="form-label" for="auth_email">Email</label>
+                                <input type="email" id="reg_email" name="reg_email" class="form-control" placeholder="Email" />
+                                <label class="form-label" for="reg_email">Email</label>
                             </div>
                         </div>
 
@@ -60,8 +61,8 @@ $page_name = "Register";
                                 @
                             </div>
                             <div data-mdb-input-init class="form-floating">
-                                <input type="password" id="auth_password" name="auth_password" class="form-control" placeholder="Password" />
-                                <label class="form-label" for="auth_password">Password</label>
+                                <input type="password" id="reg_password" name="reg_password" class="form-control" placeholder="Password" />
+                                <label class="form-label" for="reg_password">Password</label>
                             </div>
                         </div>
 
@@ -70,8 +71,8 @@ $page_name = "Register";
                                 @
                             </div>
                             <div data-mdb-input-init class="form-floating">
-                                <input type="password" id="auth_confirm_password" name="auth_confirm_password" class="form-control" placeholder="Confirm Password" />
-                                <label class="form-label" for="auth_confirm_password">Confirm Password</label>
+                                <input type="password" id="reg_confirm_password" name="reg_confirm_password" class="form-control" placeholder="Confirm Password" />
+                                <label class="form-label" for="reg_confirm_password">Confirm Password</label>
                             </div>
                         </div>
 
@@ -99,28 +100,33 @@ $page_name = "Register";
             e.preventDefault();
             let formData = new FormData(this);
 
-            let auth_username = formData.get("auth_username");
-            let auth_email = formData.get("auth_email");
-            let auth_password = formData.get("auth_password");
-            let auth_confirm_password = formData.get("auth_confirm_password");
+            let action = formData.get("action");
+            let reg_username = formData.get("reg_username");
+            let reg_email = formData.get("reg_email");
+            let reg_password = formData.get("reg_password");
+            let reg_confirm_password = formData.get("reg_confirm_password");
 
-            if (auth_password !== auth_confirm_password) {
+            console.log(action, reg_username, reg_email, reg_password, reg_confirm_password);
+            if (reg_username === "" || reg_email === "" || reg_password === "" || reg_confirm_password === "") {
                 frmRegister_alert.classList.remove("alert-info", "alert-success");
                 frmRegister_alert.classList.add("alert-danger");
                 frmRegister_alert.classList.remove("d-none");
-                frmRegister_alert_message.innerHTML = "Passwords do not match";
+                frmRegister_alert_message.innerHTML = "All fields are required";
                 return;
             }
     
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "register",
-                    username: auth_username,
-                    email: auth_email,
-                    password: auth_password
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    frmRegister_alert.classList.remove("alert-success", "alert-danger");
+                    frmRegister_alert.classList.add("alert-info");
+                    frmRegister_alert.classList.remove("d-none");
+                    frmRegister_alert_message.innerHTML = "Registering...";
+                },
                 success: function(response) {
                     console.log(response);
                     frmRegister_alert_message.innerHTML = response.message;

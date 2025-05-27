@@ -62,7 +62,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#!">My Profile</a></li>
+                            <li><a class="dropdown-item" href="/public/profile">My Profile</a></li>
                             <?php if (isset($_COOKIE['auth_token']) && $role_type == "standard"):?>
                             <!-- <li><a class="dropdown-item" href="#!">My Wishlist</a></li> -->
                             <li><a class="dropdown-item" href="/public/orders">My Orders</a></li>
@@ -89,15 +89,21 @@
     </div>
 </nav>
 <script>
+    <?php if (isset($_COOKIE['auth_token'])):?>
     let btnLogout = document.getElementById("btnLogout");
     btnLogout.addEventListener("click", function(e) { // Corrected typo here
         e.preventDefault();
+        let formData = new FormData();
+        formData.append("action", "logout");
         $.ajax({
             url: "/api/v1.php",
             type: "POST",
-            data: JSON.stringify({
-                action: "logout",
-            }),
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                console.log("Logging out...");
+            },
             success: function(response) {
                 alert(response.message);
                 // Optionally redirect to login page after logout
@@ -108,4 +114,5 @@
             }
         });
     });
+    <?php endif;?>
 </script>

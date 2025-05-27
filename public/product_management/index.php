@@ -311,6 +311,7 @@ $role_type = $this_user->role_type;
     <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmAddProduct">
+                <input type="hidden" name="action" id="action" value="product_create">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="AddProductTitle">Add Product</h5>
@@ -347,36 +348,34 @@ $role_type = $this_user->role_type;
                             <div class="form-floating">
                                 <select name="add_product_category" id="add_product_category" class="form-control">
                                 </select>
-                                <label for="add_product_description">Category</label>
+                                <label for="add_product_category">Category</label>
                             </div>
                         </div>
-                        <!-- Add file image -->
                         <div class="mb-2">
                             <label for="add_product_image">Product Images</label>
                             <input type="file" name="add_product_image" id="add_product_image" class="form-control" placeholder="Image" required multiple>
                         </div>
-                        <!-- Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="add_product_price" id="add_product_price" class="form-control" placeholder="Price" required>
-                                <label for="add_product_price">Price</label>
+                                <input type="number" name="add_product_price_now" id="add_product_price_now" class="form-control" placeholder="Price" required>
+                                <label for="add_product_price_now">Price</label>
                             </div>
                         </div>
                         <!-- Discount Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="add_product_original_price" id="add_product_original_price" class="form-control" placeholder="Discount Price">
-                                <label for="add_product_original_price">Original Price</label>
+                                <input type="number" name="add_product_price_original" id="add_product_price_original" class="form-control" placeholder="Discount Price">
+                                <label for="add_product_price_original">Original Price</label>
                             </div>
                         </div>
                         <!-- Stock -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="add_product_stock" id="add_product_stock" class="form-control" placeholder="Stock" required>
-                                <label for="add_product_stock">Stock</label>
+                                <input type="number" name="add_product_quantity" id="add_product_quantity" class="form-control" placeholder="Stock" required>
+                                <label for="add_product_quantity">Stock</label>
                             </div>
                         </div>
                         <div class="modal-footer" id="AddProductFooter">
@@ -396,6 +395,7 @@ $role_type = $this_user->role_type;
     <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmUpdateProduct">
+                <input type="hidden" name="action" id="action" value="product_update">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="UpdateProductTitle">Update Product: <span id="update_product_name_view"></span></h5>
@@ -433,43 +433,42 @@ $role_type = $this_user->role_type;
                             <div class="form-floating">
                                 <select name="update_product_category" id="update_product_category" class="form-control">
                                 </select>
-                                <label for="add_product_description">Category</label>
+                                <label for="update_product_category">Category</label>
                             </div>
                         </div>
-                        <!-- Add file image -->
                         <div class="mb-2">
-                            <label for="add_product_image">Product Images</label>
-                            <input type="file" name="add_product_image" id="add_product_image" class="form-control" placeholder="Image" required multiple>
+                            <label for="update_product_image">Product Image</label>
+                            <input type="file" name="update_product_image" id="update_product_image" class="form-control" placeholder="Image">
                         </div>
                         <!-- Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="update_product_price" id="update_product_price" class="form-control" placeholder="Price" required>
-                                <label for="update_product_price">Price</label>
+                                <input type="number" name="update_product_price_now" id="update_product_price_now" class="form-control" placeholder="Price" required>
+                                <label for="update_product_price_now">Price</label>
                             </div>
                         </div>
                         <!-- Discount Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="update_product_original_price" id="update_product_original_price" class="form-control" placeholder="Discount Price">
-                                <label for="update_product_original_price">Original Price</label>
+                                <input type="number" name="update_product_price_original" id="update_product_price_original" class="form-control" placeholder="Discount Price">
+                                <label for="update_product_price_original">Original Price</label>
                             </div>
                         </div>
                         <!-- Stock -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="update_product_stock" id="update_product_stock" class="form-control" placeholder="Stock" required>
-                                <label for="update_product_stock">Stock</label>
+                                <input type="number" name="update_product_quantity" id="update_product_quantity" class="form-control" placeholder="Stock" required>
+                                <label for="update_product_quantity">Stock</label>
                             </div>
                         </div>
                         <div class="modal-footer" id="AddProductFooter">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success" id="btnAddProduct">
+                            <button type="submit" class="btn btn-dark" id="btnAddProduct">
                                 <i class="bi bi-floppy-fill"></i>
-                                Add
+                                Update
                             </button>
                         </div>
                     </div>
@@ -482,6 +481,7 @@ $role_type = $this_user->role_type;
         <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmUpdateProduct">
+                <input type="hidden" name="update_product_action" id="update_product_action" value="product_update">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="AddProductTitle">Update Product</h5>
@@ -523,24 +523,24 @@ $role_type = $this_user->role_type;
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="update_product_price" id="update_product_price" class="form-control" placeholder="Price" required>
-                                <label for="update_product_price">Price</label>
+                                <input type="number" name="update_product_price_now" id="update_product_price_now" class="form-control" placeholder="Price" required>
+                                <label for="update_product_price_now">Price</label>
                             </div>
                         </div>
                         <!-- Discount Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="update_product_discount_price" id="update_product_discount_price" class="form-control" placeholder="Discount Price">
-                                <label for="update_product_discount_price">Discount Price</label>
+                                <input type="number" name="update_product_price_original" id="update_product_price_original" class="form-control" placeholder="Discount Price">
+                                <label for="update_product_price_original">Discount Price</label>
                             </div>
                         </div>
                         <!-- Stock -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <input type="number" name="update_product_stock" id="update_product_stock" class="form-control" placeholder="Stock" required>
-                                <label for="update_product_stock">Stock</label>
+                                <input type="number" name="update_product_quantity" id="update_product_quantity" class="form-control" placeholder="Stock" required>
+                                <label for="update_product_quantity">Stock</label>
                             </div>
                         </div>
                         <div class="modal-footer" id="AddProductFooter">
@@ -560,6 +560,7 @@ $role_type = $this_user->role_type;
     <div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmdeleteProduct">
+                <input type="hidden" name="action" id="action" value="product_delete">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="deleteCategoryTitle">
@@ -598,7 +599,7 @@ $role_type = $this_user->role_type;
 
     <script>
         var page = 1;
-        var paginate = 20;
+        var paginate = 100;
         var search_name = "";
         var search_category = "";
         var search_code = "";
@@ -665,7 +666,7 @@ $role_type = $this_user->role_type;
                         let product_name = product.product_name;
                         let product_price_now = product.product_price_now;
                         let product_price_original = product.product_price_original;
-
+                        let product_image = product.product_image;
                         console.log(product_price_now, product_price_original, product_price_now > product_price_original);
                         // Product infos
                         let product_view_original = product_price_now > product_price_original
@@ -677,7 +678,7 @@ $role_type = $this_user->role_type;
                                     <!-- Sale badge-->
                                     <!-- <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div> -->
                                     <!-- Product image-->
-                                    <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+                                    <img class="card-img-top" src="${product_image}" alt="..." />
                                     <!-- Product details-->
                                     <div class="card-body p-4">
                                         <div class="text-center">
@@ -722,6 +723,7 @@ $role_type = $this_user->role_type;
         frmAddProduct.addEventListener("submit", function(e) {
             e.preventDefault();
             let formData = new FormData(this);
+            let add_product_action = formData.get("action");
             let add_product_name = formData.get("add_product_name");
             let add_product_code = formData.get("add_product_code");
             let add_product_description = formData.get("add_product_description");
@@ -740,6 +742,7 @@ $role_type = $this_user->role_type;
             // console.log(add_product_name);
             // console.log(add_product_image);
             // return 0;
+            console.log("Action: ", add_product_action);
             console.log('Code: ', add_product_code);
             console.log('Name: ', add_product_name);
             console.log('Description: ', add_product_description);
@@ -752,17 +755,9 @@ $role_type = $this_user->role_type;
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "product_create",
-                    code: add_product_code,
-                    name: add_product_name,
-                    description: add_product_description,
-                    category: add_product_category,
-                    // add_product_image: add_product_image,
-                    price_now: add_product_price,
-                    price_original: add_product_original_price,
-                    quantity: add_product_quantity
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     let AddProductAlertMsg = document.getElementById("AddProductAlertMsg");
                     let AddProductAlert = document.getElementById("AddProductAlert");
@@ -790,22 +785,24 @@ $role_type = $this_user->role_type;
         frmUpdateProduct.addEventListener("submit", function(e) {
             e.preventDefault();
             let formData = new FormData(this);
+            let update_product_action = formData.get("action");
             let update_product_id = formData.get("update_product_id");
             let update_product_name = formData.get("update_product_name");
             let update_product_code = formData.get("update_product_code");
             let update_product_description = formData.get("update_product_description");
             let update_product_category = formData.get("update_product_category");
             let update_product_image = formData.get("update_product_image");
-            let update_product_price = formData.get("update_product_price");
-            let update_product_original_price = formData.get("update_product_original_price");
-            let update_product_quantity = formData.get("update_product_stock");
+            let update_product_price = formData.get("update_product_price_now");
+            let update_product_original_price = formData.get("update_product_price_original");
+            let update_product_quantity = formData.get("update_product_quantity");
 
+            console.log("Action: ", update_product_action);
             console.log("ID: ", update_product_id);
             console.log('Code: ', update_product_code);
             console.log('Name: ', update_product_name);
             console.log('Description: ', update_product_description);
             console.log('Category: ', update_product_category);
-            // console.log('Image: ', update_product_image);
+            console.log('Image: ', update_product_image);
             console.log('Price: ', update_product_price);
             console.log('Original Price: ', update_product_original_price);
             console.log('Quantity: ', update_product_quantity);
@@ -813,18 +810,19 @@ $role_type = $this_user->role_type;
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "product_update",
-                    id: update_product_id,
-                    code: update_product_code,
-                    name: update_product_name,
-                    description: update_product_description,
-                    category: update_product_category,
-                    // add_product_image: add_product_image,
-                    price_now: update_product_price,
-                    price_original: update_product_original_price,
-                    quantity: update_product_quantity
-                }),
+                processData: false,
+                contentType: false,
+                data: formData,
+                proccessData: false,
+                contentType: false,
+                beforeSend: function() {
+                    let UpdateProductAlert = document.getElementById("UpdateProductAlert");
+                    let UpdateProductAlertMsg = document.getElementById("UpdateProductAlertMsg");
+                    UpdateProductAlert.classList.remove("alert-success", "alert-danger");
+                    UpdateProductAlert.classList.add("alert-info");
+                    UpdateProductAlert.classList.remove("d-none");
+                    UpdateProductAlertMsg.textContent = "Updating product...";
+                },
                 success: function(response) {
                     let UpdateProductAlertMsg = document.getElementById("UpdateProductAlertMsg");
                     let UpdateProductAlert = document.getElementById("UpdateProductAlert");
@@ -836,7 +834,10 @@ $role_type = $this_user->role_type;
                         location.reload();
                     }, 2000);
                 },  
-                error: function(response) {
+                error: function(response, status, error) {
+                    console.log("XHR: ", response);
+                    console.log("Error: ", error);
+                    console.log("Status: ", status);
                     console.log(response.responseJSON);
                     let alert = document.getElementById("UpdateProductAlert");
                     let alertMsg = document.getElementById("UpdateProductAlertMsg");
@@ -864,6 +865,7 @@ $role_type = $this_user->role_type;
                     // console.log(response);
                     let product = response.products[0];
 
+                    console.log(product);
                     const product_id = product.idProduct;
                     const product_name = product.product_name;
                     const product_code = product.product_code;
@@ -872,10 +874,20 @@ $role_type = $this_user->role_type;
                     const product_price_now = product.product_price_now;
                     const product_price_original = product.product_price_original;
                     const product_stock = product.product_quantity;
-                    const product_status = product.product_status;
+                    // const product_status = product.product_status;
 
                     let frmUpdateProduct = document.getElementById("frmUpdateProduct");
                     frmUpdateProduct.reset();
+
+                    console.log(product);
+                    console.log("Product ID: ", product_id);
+                    console.log("Product Name: ", product_name);
+                    console.log("Product Code: ", product_code);
+                    console.log("Product Description: ", product_description);
+                    console.log("Product Category: ", product_category);
+                    console.log("Product Price Now: ", product_price_now);
+                    console.log("Product Price Original: ", product_price_original);
+                    console.log("Product Stock: ", product_stock);
 
                     frmUpdateProduct.elements['update_product_id'].value = product_id;
                     document.getElementById('update_product_name_view').textContent = product_name;
@@ -883,10 +895,10 @@ $role_type = $this_user->role_type;
                     frmUpdateProduct.elements['update_product_code'].value = product_code;
                     frmUpdateProduct.elements['update_product_description'].value = product_description;
                     frmUpdateProduct.elements['update_product_category'].value = product_category;
-                    frmUpdateProduct.elements['update_product_price'].value = product_price_now;
-                    frmUpdateProduct.elements['update_product_original_price'].value = product_price_original;
-                    frmUpdateProduct.elements['update_product_stock'].value = product_stock;
-                    frmUpdateProduct.elements['update_product_status'].value = product_status;
+                    frmUpdateProduct.elements['update_product_price_now'].value = product_price_now;
+                    frmUpdateProduct.elements['update_product_price_original'].value = product_price_original;
+                    frmUpdateProduct.elements['update_product_quantity'].value = product_quantity;
+                    // frmUpdateProduct.elements['update_product_status'].value = product_status;
 
                     console.log(product);
                 },
@@ -934,10 +946,9 @@ $role_type = $this_user->role_type;
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "product_delete",
-                    id: delete_product_id
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     let deleteProductAlertMsg = document.getElementById("deleteProductAlertMsg");
                     let deleteProductAlert = document.getElementById("deleteProductAlert");

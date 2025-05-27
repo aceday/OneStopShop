@@ -82,11 +82,11 @@ if (isset($_GET['id'])) {
                             <div class="card shadow">
                                 <div style="min-width:100%;min-height:100%">
                                     <div class="h-100 w-100">
-                                        1
+                                        <img src="" alt="" id="product_image" style="max-width: 800px; max-height: 500px; object-fit: cover;" class="img-fluid rounded-start">
                                     </div>
                                 </div>
                             </div>
-                            <div class="w-100">
+                            <!-- <div class="w-100">
                                 <div class="row p-2">
                                     <div class="col p-0 mx-2">
                                         <div class="m-2 bg-primary h-100 w-100">
@@ -109,7 +109,7 @@ if (isset($_GET['id'])) {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="w-100 w-md-50">
                             <div class="p-4">
@@ -196,6 +196,10 @@ if (isset($_GET['id'])) {
     <div class="modal fade" id="buyModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmBuyNow">
+            <input type="hidden" name="action" id="action" value="checkout-make" />
+            <input type="hidden" name="checkout_mode" id="checkout_mode" value="buy" />
+            <input type="hidden" name="product_id" id="product_id" value="<?php echo $_GET['id']?>" />
+            <input type="hidden" name="product_quantity" id="product_quantity" value="1" />
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="buyNowTitle">Buy Now > Customer Details</h5>
@@ -231,31 +235,31 @@ if (isset($_GET['id'])) {
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <textarea name="customer_phone_no" id="customer_phone_no" class="form-control" placeholder="Customer Phone No."></textarea>
-                                <label for="customer_phone_no">Phone Number</label>
+                                <textarea name="customer_phone" id="customer_phone" class="form-control" placeholder="Customer Phone No."></textarea>
+                                <label for="customer_phone">Phone Number</label>
                             </div>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <select name="customer_deliver_type" id="customer_deliver_type" class="form-control">
+                                <select name="delivery_type" id="delivery_type" class="form-control">
                                     <option value="none">--</option>
                                     <option value="pickup">Pick-up</option>
                                     <option value="deliver">Deliver</option>
                                 </select>
-                                <label for="customer_deliver_type">Deliver Type</label>
+                                <label for="delivery_type">Deliver Type</label>
                             </div>
                         </div>
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
-                                <select name="customer_payment_type" id="customer_payment_type" class="form-control">
+                                <select name="payment_type" id="payment_type" class="form-control">
                                     <option value="none">--</option>
                                     <option value="cod">Cash On Delivery (COD)</option>
                                     <option value="card">Card</option>
                                     <option value="gcash">GCash</option>
                                 </select>
-                                <label for="customer_payment_type">Payment Type</label>
+                                <label for="payment_type">Payment Type</label>
                             </div>
                         </div>
                         <div class="modal-footer" id="buyNowFooter">
@@ -297,9 +301,12 @@ if (isset($_GET['id'])) {
                     let this_product_description = document.getElementById("this_product_description");
                     let this_product_code = document.getElementById("this_product_code");
                     let this_product_stock = document.getElementById("this_product_stock");
+                    let this_product_image = document.getElementById("product_image");
+
                     this_product_type.textContent = product.product_category;
                     this_product_description.textContent = product.product_description;
                     this_product_code.textContent = product.product_code;
+                    this_product_image.src = product.product_image;
                     if (product.product_quantity > 0) {
                         buyToggle.classList.remove('d-none');
                         this_product_quantity_set = 1;
@@ -385,32 +392,37 @@ if (isset($_GET['id'])) {
         })
 
         let frmBuyNow = document.getElementById('frmBuyNow');
+        btnBuyNow.addEventListener('click', function(e) {
+            e.preventDefault();
+            frmBuyNow.reset();
+            let formData = new FormData(frmBuyNow);
+            formData.set("product_id", this_product_id);
+            formData.set("product_quantity", product_quantity_set_value.value);
+        });
         frmBuyNow.addEventListener('submit', function (e) {
             e.preventDefault();
         
             let formData = new FormData(this);
             let customer_name = formData.get("customer_name");
             let customer_address = formData.get("customer_address");
-            let customer_phone_no = formData.get("customer_phone_no");
-            let customer_deliver_type = formData.get("customer_deliver_type");
-            let customer_payment_type = formData.get("customer_payment_type");
+            let customer_phone_no = formData.get("customer_phone");
+            let customer_deliver_type = formData.get("deliver_type");
+            let customer_payment_type = formData.get("payment_type");
         
             let buyNowAlert = document.getElementById("buyNowAlert");
             let buyNowAlertMsg = document.getElementById("buyNowAlertMsg");
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "checkout-make",
-                    idUser: this_user_id,
-                    name: customer_name,
-                    address: customer_address,
-                    contact_no: customer_phone_no,
-                    products: this_product_id,
-                    quantity: this_product_quantity_set,
-                    deliver_type: customer_deliver_type,
-                    payment_type: customer_payment_type
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    buyNowAlert.classList.remove('alert-success', 'alert-danger');
+                    buyNowAlert.classList.add('alert-info');
+                    buyNowAlert.classList.remove('d-none');
+                    buyNowAlertMsg.textContent = "Processing your order...";
+                },
                 success: function(response) {
                     console.log(response);
                     buyNowAlertMsg.textContent = response.message;

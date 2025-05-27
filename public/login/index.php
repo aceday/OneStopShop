@@ -33,6 +33,7 @@ $page_name = "Login";
                     </div>
                     <form class="p-4" id="frmLogin">
                         <div class="alert alert-info d-none" id = "frmLogin_alert">
+                            <input type="hidden" name="action" id="action" value="login" />
                             <span id="frmLogin_alert_message"></span>
                         </div>
                         <div class="input-group mb-2">
@@ -88,20 +89,24 @@ $page_name = "Login";
 
         frmLogin.addEventListener("submit", function(e) {
             e.preventDefault();
-            e.preventDefault();
             let formData = new FormData(this);
 
-            let auth_username = formData.get("auth_username");
-            let auth_password = formData.get("auth_password");
+            // let action = formData.get("action");
+            // let auth_username = formData.get("auth_username");
+            // let auth_password = formData.get("auth_password");
 
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
-                data: JSON.stringify({
-                    action: "login",
-                    username: auth_username,
-                    password: auth_password
-                }),
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    frmLogin_alert.classList.remove("alert-success", "alert-danger");
+                    frmLogin_alert.classList.add("alert-info");
+                    frmLogin_alert.classList.remove("d-none");
+                    frmLogin_alert_message.innerHTML = "Logging in...";
+                },
                 success: function(response) {
                     console.log(response);
                     frmLogin_alert.classList.remove("alert-info", "alert-danger");
