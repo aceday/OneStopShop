@@ -90,7 +90,7 @@ $role_type = $this_user->role_type;
     <!-- Add Category -->
     <div class="modal fade" id="AddCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
-            <form method="POST" id="frmAddCategory">
+            <form method="POST" id="frmAddCategory" class="needs-validation" novalidate>
                 <input type="hidden" name="action" id="action" value="category_create">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
@@ -110,19 +110,16 @@ $role_type = $this_user->role_type;
                                 Only one word for naming category
                             </span>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="text" name="add_category_name" id="add_category_name" class="form-control" placeholder="Name" required>
-                                <label for="add_category_name">Name</label>
+                        <div class="mb-2">
+                            <label class="form-label" for="add_category_name">Name</label>
+                            <input type="text" name="add_category_name" id="add_category_name" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a category name.
                             </div>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <textarea name="add_category_description" id="add_category_description" class="form-control" placeholder="Description"></textarea>
-                                <label for="add_category_description">Description</label>
-                            </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="add_category_description">Description</label>
+                            <textarea name="add_category_description" id="add_category_description" class="form-control" required></textarea>
                         </div>
                         <div class="modal-footer" id="AddCategoryFooter">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
@@ -140,7 +137,7 @@ $role_type = $this_user->role_type;
     <!-- Update Employee -->
     <div class="modal fade" id="updateCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:autox">
         <div class="modal-dialog" role="document">
-            <form id="frmupdateCategory" method="POST">
+            <form id="frmupdateCategory" method="POST" class="needs-validation" novalidate>
                 <input type="hidden" name="action" id="action" value="category_update">
             <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
@@ -161,19 +158,13 @@ $role_type = $this_user->role_type;
                                 Only one word for naming category
                             </span>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="text" name="update_category_name" id="update_category_name" class="form-control" placeholder="Name" required>
-                                <label for="update_category_name">Name</label>
-                            </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_category_name">Name</label>
+                            <input type="text" name="update_category_name" id="update_category_name" class="form-control" required>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <textarea name="update_category_description" id="update_category_description" class="form-control" placeholder="Description"></textarea>
-                                <label for="update_category_description">Description</label>
-                            </div>
+                        <div class="mb-2">
+                            <label for="update_category_description">Description</label>
+                            <textarea name="update_category_description" id="update_category_description" class="form-control" required></textarea>
                         </div>
                         <div class="modal-footer" id="AddCategoryFooter">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
@@ -231,6 +222,18 @@ $role_type = $this_user->role_type;
     </div>
 
     <script>
+        (() => {
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+                }, false)
+            })
+        })()
         var page = 1;
         var paginate = 10;
         let category_list = document.getElementById("category_list");
@@ -257,13 +260,13 @@ $role_type = $this_user->role_type;
                                     </div>
                                     <div class="col-4">
                                         <a
-                                        class="btn btn-secondary"
+                                        class="btn btn-secondary mb-2 w-100 w-md-25"
                                         id="category-update-${category.idCategory}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#updateCategoryModal"
                                         ><i class="bi bi-pen"></i> Update</a>
                                         <a
-                                        class="btn btn-danger"
+                                        class="btn btn-danger mb-2 w-100 w-md-25"
                                         id="category-delete-${category.idCategory}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#deleteCategoryModal"

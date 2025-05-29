@@ -310,72 +310,68 @@ $role_type = $this_user->role_type;
     <!-- Add Product -->
     <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
-            <form method="POST" id="frmAddProduct">
+            <form method="POST" id="frmAddProduct" class="needs-validation" novalidate>
                 <input type="hidden" name="action" id="action" value="product_create">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="AddProductTitle">Add Product</h5>
                     </div>
                     <div class="modal-body py-4 px-6" id="AddProductBody">
+                        <div class="mb-2 alert alert-danger w-100 d-none" id="AddProductAlert">
+                            <span id="AddProductAlertMsg"></span>
+                        </div>
                         <div class="mb-2">
-                            <div class="alert alert-danger w-100 d-none" id="AddProductAlert">
-                                <span id="AddProductAlertMsg"></span>
-                            </div>
-                        </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="text" name="add_product_name" id="add_product_name" class="form-control" placeholder="Name" required>
-                                <label for="add_product_name">Name</label>
-                            </div>
-                        </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="text" name="add_product_code" id="add_product_code" class="form-control" placeholder="Product Code" required>
-                                <label for="add_product_code">Prodct Code</label>
-                            </div>
-                        </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <textarea name="add_product_description" id="add_product_description" class="form-control" placeholder="Description"></textarea>
-                                <label for="add_product_description">Description</label>
-                            </div>
-                        </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <select name="add_product_category" id="add_product_category" class="form-control">
-                                </select>
-                                <label for="add_product_category">Category</label>
+                            <label for="add_product_name">Name</label>
+                            <input type="text" name="add_product_name" id="add_product_name" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a product name.
                             </div>
                         </div>
                         <div class="mb-2">
-                            <label for="add_product_image">Product Images</label>
-                            <input type="file" name="add_product_image" id="add_product_image" class="form-control" placeholder="Image" required multiple>
-                        </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="number" name="add_product_price_now" id="add_product_price_now" class="form-control" placeholder="Price" required>
-                                <label for="add_product_price_now">Price</label>
+                            <label for="add_product_code">Prodct Code</label>
+                            <input type="text" name="add_product_code" id="add_product_code" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a product code.
                             </div>
                         </div>
-                        <!-- Discount Price -->
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="number" name="add_product_price_original" id="add_product_price_original" class="form-control" placeholder="Discount Price">
-                                <label for="add_product_price_original">Original Price</label>
+                        <div class="mb-2">
+                            <label for="add_product_description">Description</label>
+                            <textarea name="add_product_description" id="add_product_description" class="form-control" required></textarea>
+                            <div class="invalid-feedback">
+                                Please enter a product description.
                             </div>
                         </div>
-                        <!-- Stock -->
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="number" name="add_product_quantity" id="add_product_quantity" class="form-control" placeholder="Stock" required>
-                                <label for="add_product_quantity">Stock</label>
+                        <div class="mb-2">
+                            <label for="add_product_category" class="form-label">Category</label>
+                            <select class="form-select" name="add_product_category" id="add_product_category" class="form-control">
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="add_product_image">Product Images</label>
+                            <input type="file" name="add_product_image" id="add_product_image" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please select a valid image file.
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="add_product_price_now">Price</label>
+                            <input type="number" name="add_product_price_now" id="add_product_price_now" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid price.
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="add_product_price_original">Original Price</label>
+                            <input type="number" name="add_product_price_original" id="add_product_price_original" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid original price.
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="add_product_quantity">Stock</label>
+                            <input type="number" name="add_product_quantity" id="add_product_quantity" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid stock quantity.
                             </div>
                         </div>
                         <div class="modal-footer" id="AddProductFooter">
@@ -394,7 +390,7 @@ $role_type = $this_user->role_type;
     <!-- Update Product -->
     <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
-            <form method="POST" id="frmUpdateProduct">
+            <form class="needs-validation" method="POST" id="frmUpdateProduct" novalidate>
                 <input type="hidden" name="action" id="action" value="product_update">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
@@ -407,61 +403,60 @@ $role_type = $this_user->role_type;
                                 <span id="UpdateProductAlertMsg"></span>
                             </div>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="text" name="update_product_name" id="update_product_name" class="form-control" placeholder="Name" required>
-                                <label for="update_product_name">Name</label>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_product_name">Name</label>
+                            <input type="text" name="update_product_name" id="update_product_name" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a product name.
                             </div>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <textarea name="update_product_code" id="update_product_code" class="form-control" placeholder="Description"></textarea>
-                                <label for="update_product_code">Product Code</label>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_product_code">Product Code</label>
+                            <textarea name="update_product_code" id="update_product_code" class="form-control" required></textarea>
+                            <div class="invalid-feedback">
+                                Please enter a product code.
                             </div>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <textarea name="update_product_description" id="update_product_description" class="form-control" placeholder="Description"></textarea>
-                                <label for="update_product_description">Description</label>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_product_description">Description</label>
+                            <textarea name="update_product_description" id="update_product_description" class="form-control" required></textarea>
+                            <div class="invalid-feedback">
+                                Please enter a product description.
                             </div>
                         </div>
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <select name="update_product_category" id="update_product_category" class="form-control">
-                                </select>
-                                <label for="update_product_category">Category</label>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_product_category">Category</label>
+                            <select name="update_product_category" id="update_product_category" class="form-control" required></select>
+                            <div class="invalid-feedback">
+                                Please select a product category.
                             </div>
                         </div>
                         <div class="mb-2">
                             <label for="update_product_image">Product Image</label>
-                            <input type="file" name="update_product_image" id="update_product_image" class="form-control" placeholder="Image">
-                        </div>
-                        <!-- Price -->
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="number" name="update_product_price_now" id="update_product_price_now" class="form-control" placeholder="Price" required>
-                                <label for="update_product_price_now">Price</label>
+                            <input type="file" name="update_product_image" id="update_product_image" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please select a valid image file.
                             </div>
                         </div>
-                        <!-- Discount Price -->
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="number" name="update_product_price_original" id="update_product_price_original" class="form-control" placeholder="Discount Price">
-                                <label for="update_product_price_original">Original Price</label>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_product_price_now">Price</label>
+                            <input type="number" name="update_product_price_now" id="update_product_price_now" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid price.
                             </div>
                         </div>
-                        <!-- Stock -->
-                        <div class="input-group mb-2">
-                            <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
-                            <div class="form-floating">
-                                <input type="number" name="update_product_quantity" id="update_product_quantity" class="form-control" placeholder="Stock" required>
-                                <label for="update_product_quantity">Stock</label>
+                        <div class="mb-2">
+                            <label for="update_product_price_original">Original Price</label>
+                            <input type="number" name="update_product_price_original" id="update_product_price_original" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid original price.
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label for="update_product_quantity">Stock</label>
+                            <input type="number" name="update_product_quantity" id="update_product_quantity" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid stock quantity.
                             </div>
                         </div>
                         <div class="modal-footer" id="AddProductFooter">
@@ -514,12 +509,10 @@ $role_type = $this_user->role_type;
                                 <label for="update_product_description">Category</label>
                             </div>
                         </div>
-                        <!-- Add file image -->
                         <div class="mb-2">
                             <label for="update_product_image">Product Images</label>
                             <input type="file" name="update_product_image" id="update_product_image" class="form-control" placeholder="Image" required multiple>
                         </div>
-                        <!-- Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
@@ -527,7 +520,6 @@ $role_type = $this_user->role_type;
                                 <label for="update_product_price_now">Price</label>
                             </div>
                         </div>
-                        <!-- Discount Price -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
@@ -535,7 +527,6 @@ $role_type = $this_user->role_type;
                                 <label for="update_product_price_original">Discount Price</label>
                             </div>
                         </div>
-                        <!-- Stock -->
                         <div class="input-group mb-2">
                             <div class="input-group-text"><i class="bi bi-view-stacked"></i></div>
                             <div class="form-floating">
@@ -556,7 +547,7 @@ $role_type = $this_user->role_type;
         </div>
     </div>
 
-    <!-- Delete Category -->
+    <!-- Delete Product -->
     <div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmdeleteProduct">
@@ -598,6 +589,20 @@ $role_type = $this_user->role_type;
     </div>
 
     <script>
+        (() => {
+            const forms = document.querySelectorAll('.needs-validation')
+
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+                }, false)
+            })
+        })()
         var page = 1;
         var paginate = 100;
         var search_name = "";

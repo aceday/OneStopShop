@@ -154,6 +154,7 @@ if (isset($_GET['id'])) {
                                                 <span class="bg-gray text-danger d-none" id="this_product_price_discount_percent">-15%</span>
                                             </div>
                                         </div>
+                                        <?php if ($role_type == "standard"):?>
                                         <div class="col-12">
                                             <div class="w-100 d-none" id="buyToggle">
                                                 <div class="w-100 mb-4">
@@ -181,6 +182,13 @@ if (isset($_GET['id'])) {
                                                 <a class="btn btn-secondary" id="btnBuyNow" data-bs-toggle="modal" data-bs-target="#buyModal">Buy Now</a>
                                             </div>
                                         </div>
+                                        <?php else:?>
+                                        <div class="col-12">
+                                            <div class="w-100">
+                                                <a class="btn btn-secondary" href="/public/product_management">View On Product Management</a>
+                                            </div>
+                                        </div>
+                                        <?php endif;?>
                                     </div>
                                 </div>
                             </div>

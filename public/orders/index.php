@@ -51,6 +51,12 @@ $role_type = $this_user->role_type;
 
         <section class="py-2">
             <div class="container px-4 px-lg-5 mt-5">
+                <div class="w-100 d-flex flex-row gap-2 mb-4">
+                    <a class="btn btn-secondary" id="order_filter_all">All</a>
+                    <a class="btn btn-warning" id="order_filter_pending">Pending</a>
+                    <a class="btn btn-success" id="order_filter_completed">Completed</a>
+                    <a class="btn btn-danger" id="order_filter_cancelled">Cancelled</a>
+                </div>
                 <div class="row">
 
                 </div>
@@ -129,11 +135,11 @@ $role_type = $this_user->role_type;
     <!-- Cancel Order -->
     <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
-            <form method="POST" id="frmdeleteCategory">
+            <form method="POST" id="frmCancelOrder">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold" id="deleteCategoryTitle">
-                            Delete Category: <span id="delete_cat_name_view"></span>
+                            Cancel Category: <span id="delete_cat_name_view"></span>
                         </h5>
                     </div>
                     <div class="modal-body p-4 px-6" id="deleteCategoryBody">
@@ -169,6 +175,8 @@ $role_type = $this_user->role_type;
     <script>
         var page = 1;
         var paginate = 10;
+        var order_status = "";
+
         let order_list = document.getElementById("order_list");
         function fetchOrderList() {
             let param = new URLSearchParams({
@@ -176,6 +184,7 @@ $role_type = $this_user->role_type;
                 user_id: this_user_id,
                 page: page,
                 paginate: paginate,
+                status: order_status
             });
             $.ajax({
                 url: '/api/v1.php?' + param,
@@ -196,7 +205,6 @@ $role_type = $this_user->role_type;
                                             <div class="row">
                                                 <div class="col">
                                                     <a class="btn btn-secondary" href="/public/product/?id=${order.product_ids}">View Product</a>
-                                                    <a class="btn btn-secondary" href="/public/product/?id=${order.product_ids}">View Product</a>
                                                     <a class="btn btn-danger" href="/public/product/?id=${order.product_ids}">Cancel Order</a>
                                                 </div>
                                             </div>
@@ -210,13 +218,38 @@ $role_type = $this_user->role_type;
                 },
                 error: function(xhr, status, error) {
                     let response = xhr.responseJSON;
-                    // console.log("X: ", xhr);
-                    // console.log("Status: ", status);
-                    // console.log("Error: ", error);
+                    order_list.innerHTML = `
+                        <div class="col-12 card p-4">
+                                <span class="text-center fw-bold">${response.message}</span>
+                        </div>
+                    `;
                 }
             });
         }
         fetchOrderList();
+
+        document.getElementById('order_filter_all').addEventListener("click", function (e) {
+            order_status = "";
+            page = 1;
+            fetchOrderList();
+        });
+        document.getElementById('order_filter_pending').addEventListener("click", function (e) {
+            order_status = "pending";
+            page = 1;
+            fetchOrderList();
+        });
+        document.getElementById('order_filter_completed').addEventListener("click", function (e) {
+            order_status = "completed";
+            page = 1;
+            fetchOrderList();
+        });
+        document.getElementById('order_filter_cancelled').addEventListener("click", function (e) {
+            order_status = "cancelled";
+            page = 1;
+            fetchOrderList();
+        });
+
+
 
         // View Order
         // let frmupdateCategory = document.getElementById("frmupdateCategory");

@@ -54,6 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         "user_id" => $user['idUser'],
                         "username" => $user['username'],
                         "role_type" => $user['role_type'],
+                        "user_image" => $user['user_image'] ?? null,
+                        "email" => $user['email'] ?? null,
                         "iat" => time(),
                         "exp" => time() + (60 * 60 * 24) // 1 day expiration
                     );
@@ -883,15 +885,121 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
         exit;
-    } else {
-        echo json_encode(array(
-            "status" => "error",
-            "status_code" => 400,
-            "message" => "Invalid action"
+    } else if ($_POST['action'] == "user_update") {
+        if (!isset($_POST['update_username']) || !isset($_POST['update_email']) ||
+            !isset($_POST['update_password'])) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input username, email and password"
+            ));
+            $pdo = null;
+            exit;
+        }
+
+        $decode_jwt = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
+        $user_id = $decode_jwt->user_id;
+        // Image
+        $image_path = "";
+        $extensions = ["jpg", "jpeg", "png", "gif"];
+
+        $image_name = $_FILES['update_profile_image']['name'] ?? null;
+        $image_tmp_name = $_FILES['update_profile_image']['tmp_name'] ?? null;
+        $image_type = $_FILES['update_profile_image']['type'] ?? null;
+        $image_size = $_FILES['update_profile_image']['size'] ?? null;
+
+        $image_file_type = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
+
+        // Create folder if not exists
+        if (!is_dir("../data/image/user/")) {
+            mkdir("../data/image/user/", 0777, true);
+        }
+        $db_media = "../data/image/user/";
+
+        if (!in_array($image_file_type, $extensions)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Invalid image file type"
+            ));
+            http_response_code(400);
+            $pdo = null;
+            exit;
+        }
+
+        // Upload image
+        $target_path = $db_media . $image_name;
+
+        if (!move_uploaded_file($image_tmp_name, $target_path)) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => "Failed to move uploaded file"
+            ));
+            http_response_code(500);
+            $pdo = null;
+            exit;
+        }
+
+        // Save relative path to DB
+        $user_image = "/data/image/user/" . $image_name;
+
+        $username = $_POST['update_username'];
+        $email = $_POST['update_email'];
+        $password = $_POST['update_password'];
+        // Check username
+        $sql_cmd = "SELECT *
+                    FROM users u
+                    WHERE u.username = :username OR u.email = :email
+                    ";
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":username", $username);
+        $cur->bindValue(":email", $email);
+        $cur->execute();
+
+        $user = $cur->fetch(PDO::FETCH_ASSOC);
+        if (!$user) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "User not found"
+            ));
+            http_response_code(404);
+            $pdo = null;
+            exit;
+        }
+        // Then update it
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $cur = $pdo->prepare("UPDATE users
+                                SET email = :email,
+                                password = :password,
+                                user_image = :user_image
+                                WHERE username = :username");
+        $cur->execute(array(
+            ":email" => $email,
+            ":password" => $hashed_password,
+            ":username" => $username,
+            ":user_image" => $user_image
         ));
-        http_response_code(400);
-        $pdo = null;
-        exit;
+        if ($cur->rowCount() > 0) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "User updated successfully"
+            ));
+            http_response_code(200);
+            $pdo = null;
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 403,
+                "message" => "No changes made"
+            ));
+            http_response_code(403);
+            $pdo = null;
+            exit;
+        }
     }
 
 } else if ($_SERVER["REQUEST_METHOD"] === "GET") {
@@ -1273,7 +1381,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
     } else if (isset($_GET['orders'])) {
-        $sql_cmd = "SELECT o.idOrder, o.product_ids, o.status, o.name, o.address, o.deliver_type, o.payment_type, o.contact_no, o.created_at, p.product_name, p.product_price_now
+        $sql_cmd = "SELECT o.idOrder, o.product_ids, o.status, o.customer_name, o.customer_address, o.deliver_type, o.payment_type, o.customer_phone, o.created_at, p.product_name, p.product_price_now
                     FROM orders o
                     LEFT JOIN products p ON o.product_ids = p.idProduct
                     WHERE 1=1";
@@ -1289,10 +1397,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // Order -> status
         if (isset($_GET['status'])) {
-            $sql_cmd .= " AND status = :status";
-            $params[":status"] = $_GET['status'];
+            $sql_cmd .= " AND status LIKE :status";
+            $params[":status"] = "%" . $_GET['status'] . "%";
             $types .= "s";
         }
+        
 
         // Order -> user_id
         if (isset($_GET['user_id'])) {

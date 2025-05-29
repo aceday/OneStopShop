@@ -14,9 +14,9 @@
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="/public/dashboard">All Products</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" href="#!">Popular Items</a></li>
-                        <li><a class="dropdown-item" href="#!">New Arrivals</a></li>
+                        <!-- <li><hr class="dropdown-divider" /></li> -->
+                        <!-- <li><a class="dropdown-item" href="#!">Popular Items</a></li> -->
+                        <!-- <li><a class="dropdown-item" href="#!">New Arrivals</a></li> -->
                     </ul>
                 </li>
                 <?php endif;?>
@@ -60,7 +60,7 @@
                 <?php if (isset($_COOKIE["auth_token"])):?>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
+                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Menu</a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="/public/profile">My Profile</a></li>
                             <?php if (isset($_COOKIE['auth_token']) && $role_type == "standard"):?>
@@ -70,8 +70,9 @@
                             <?php if (isset($_COOKIE['auth_token']) && $role_type == "admin"):?>
                             <li><a class="dropdown-item" href="/public/product_management">Product Managment</a></li>
                             <li><a class="dropdown-item" href="/public/category_management">Category Managment</a></li>
+                            <li><a class="dropdown-item" href="/public/category_management">Inventory Managment</a></li>
+                            <li><a class="dropdown-item" href="/public/category_management">User Managment</a></li>
                             <?php endif;?>
-                            <li><a class="dropdown-item" href="#!">Settings</a></li>
                             <li><hr class="dropdown-divider" /></li>
 
                             <li><a class="dropdown-item" id="btnLogout">Logout</a></li>
