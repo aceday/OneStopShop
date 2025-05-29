@@ -71,7 +71,7 @@
                             <li><a class="dropdown-item" href="/public/product_management">Product Managment</a></li>
                             <li><a class="dropdown-item" href="/public/category_management">Category Managment</a></li>
                             <li><a class="dropdown-item" href="/public/category_management">Inventory Managment</a></li>
-                            <li><a class="dropdown-item" href="/public/category_management">User Managment</a></li>
+                            <li><a class="dropdown-item" href="/public/user_management">User Managment</a></li>
                             <?php endif;?>
                             <li><hr class="dropdown-divider" /></li>
 

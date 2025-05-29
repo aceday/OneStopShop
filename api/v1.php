@@ -1199,16 +1199,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
     } else if (isset($_GET['user'])) {
-        if (!isset($_GET['idUser']) && !isset($_GET['username']) && !isset($_GET['email'])) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Please input user id"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
+        // if (!isset($_GET['idUser']) && !isset($_GET['username']) && !isset($_GET['email'])) {
+        //     echo json_encode(array(
+        //         "status" => "error",
+        //         "status_code" => 400,
+        //         "message" => "Please input user id"
+        //     ));
+        //     http_response_code(400);
+        //     $pdo = null;
+        //     exit;
+        // }
 
         $sql_cmd = "SELECT idUser, username, email, status, role_type
                     FROM users

@@ -55,6 +55,7 @@ function head_js() {
     echo '
         <script src="/node_modules/jquery/dist/jquery.js"></script>
         <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+        <script src="/public/assets/js/base.js"></script>
     ';
 }
 
