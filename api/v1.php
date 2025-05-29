@@ -897,52 +897,55 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
 
-        $decode_jwt = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
-        $user_id = $decode_jwt->user_id;
-        // Image
-        $image_path = "";
-        $extensions = ["jpg", "jpeg", "png", "gif"];
+        if (isset($_POST['update_profile_image'])) {
 
-        $image_name = $_FILES['update_profile_image']['name'] ?? null;
-        $image_tmp_name = $_FILES['update_profile_image']['tmp_name'] ?? null;
-        $image_type = $_FILES['update_profile_image']['type'] ?? null;
-        $image_size = $_FILES['update_profile_image']['size'] ?? null;
-
-        $image_file_type = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
-
-        // Create folder if not exists
-        if (!is_dir("../data/image/user/")) {
-            mkdir("../data/image/user/", 0777, true);
+            $decode_jwt = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
+            $user_id = $decode_jwt->user_id;
+            // Image
+            $image_path = "";
+            $extensions = ["jpg", "jpeg", "png", "gif"];
+    
+            $image_name = $_FILES['update_profile_image']['name'] ?? null;
+            $image_tmp_name = $_FILES['update_profile_image']['tmp_name'] ?? null;
+            $image_type = $_FILES['update_profile_image']['type'] ?? null;
+            $image_size = $_FILES['update_profile_image']['size'] ?? null;
+    
+            $image_file_type = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
+    
+            // Create folder if not exists
+            if (!is_dir("../data/image/user/")) {
+                mkdir("../data/image/user/", 0777, true);
+            }
+            $db_media = "../data/image/user/";
+    
+            if (!in_array($image_file_type, $extensions)) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 400,
+                    "message" => "Invalid image file type"
+                ));
+                http_response_code(400);
+                $pdo = null;
+                exit;
+            }
+    
+            // Upload image
+            $target_path = $db_media . $image_name;
+    
+            if (!move_uploaded_file($image_tmp_name, $target_path)) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 500,
+                    "message" => "Failed to move uploaded file"
+                ));
+                http_response_code(500);
+                $pdo = null;
+                exit;
+            }
+    
+            // Save relative path to DB
+            $user_image = "/data/image/user/" . $image_name;
         }
-        $db_media = "../data/image/user/";
-
-        if (!in_array($image_file_type, $extensions)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 400,
-                "message" => "Invalid image file type"
-            ));
-            http_response_code(400);
-            $pdo = null;
-            exit;
-        }
-
-        // Upload image
-        $target_path = $db_media . $image_name;
-
-        if (!move_uploaded_file($image_tmp_name, $target_path)) {
-            echo json_encode(array(
-                "status" => "error",
-                "status_code" => 500,
-                "message" => "Failed to move uploaded file"
-            ));
-            http_response_code(500);
-            $pdo = null;
-            exit;
-        }
-
-        // Save relative path to DB
-        $user_image = "/data/image/user/" . $image_name;
 
         $username = $_POST['update_username'];
         $email = $_POST['update_email'];
@@ -970,17 +973,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         // Then update it
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $cur = $pdo->prepare("UPDATE users
-                                SET email = :email,
-                                password = :password,
-                                user_image = :user_image
-                                WHERE username = :username");
-        $cur->execute(array(
-            ":email" => $email,
-            ":password" => $hashed_password,
-            ":username" => $username,
-            ":user_image" => $user_image
-        ));
+        if (isset($_POST['update_profile_image'])) {
+            $cur = $pdo->prepare("UPDATE users
+                                    SET email = :email,
+                                    password = :password,
+                                    user_image = :user_image
+                                    WHERE username = :username");
+            $cur->execute(array(
+                ":email" => $email,
+                ":password" => $hashed_password,
+                ":username" => $username,
+                ":user_image" => $user_image
+            ));
+        } else {
+            $cur = $pdo->prepare("UPDATE users
+                                    SET email = :email,
+                                    password = :password
+                                    WHERE username = :username");
+            $cur->execute(array(
+                ":email" => $email,
+                ":password" => $hashed_password,
+                ":username" => $username
+            ));
+        }
         if ($cur->rowCount() > 0) {
             echo json_encode(array(
                 "status" => "success",
@@ -1000,6 +1015,85 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pdo = null;
             exit;
         }
+    } else if ($_POST['action'] == "user_delete") {
+        if (!isset($_POST['delete_user_id']) || empty($_POST['delete_user_id'])) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input user id"
+            ));
+            http_response_code(400);
+            $pdo = null;
+            exit;
+        }
+
+        // Checking if only one admin account exists so decline the operation
+        $sql_cmd = "SELECT COUNT(*) as total_admins
+                    FROM users
+                    WHERE role_type = 'admin'";
+        $cur = $pdo->prepare($cur);
+        $cur->execute();
+        $total_admins = $cur->fetch(PDO::FETCH_ASSOC)['total_admins'];
+        if ($total_admins <= 1) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 403,
+                "message" => "Cannot delete the last admin account"
+            ));
+            http_response_code(403);
+            $pdo = null;
+            exit;
+        }
+
+        try {
+            $user_id = $_POST['delete_user_id'];
+    
+            $sql_cmd = "DELETE FROM users WHERE user_id = :user_id";
+    
+            // Execute
+            $cur = $pdo->prepare($sql_cmd);
+            $cur->bindValue(":user_id", $user_id);
+            $cur->execute();
+    
+            if ($cur->rowCount() > 0) {
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 200,
+                    "message" => "User deleted successfully"
+                ));
+                http_response_code(200);
+                $pdo = null;
+                exit;
+            } else {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 404,
+                    "message" => "User not found"
+                ));
+                http_response_code(404);
+                $pdo = null;
+                exit;
+            }
+
+        } catch (PDOException $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => $e->getMessage()
+            ));
+            http_response_code(500);
+            $pdo = null;
+            exit;
+        }
+    } else {
+        echo json_encode(array(
+            "status" => "error",
+            "status_code" => 400,
+            "message" => "Invalid action"
+        ));
+        http_response_code(400);
+        $pdo = null;
+        exit;
     }
 
 } else if ($_SERVER["REQUEST_METHOD"] === "GET") {

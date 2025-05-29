@@ -101,7 +101,7 @@ $role_type = $this_user->role_type;
     </body>
 
     <!-- Add Category -->
-    <div class="modal fade" id="AddCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+    <!-- <div class="modal fade" id="AddCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmAddCategory" class="needs-validation" novalidate>
                 <input type="hidden" name="action" id="action" value="category_create">
@@ -145,43 +145,55 @@ $role_type = $this_user->role_type;
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
     <!-- Update Employee -->
-    <div class="modal fade" id="updateCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:autox">
+    <div class="modal fade" id="updateUserModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:autox">
         <div class="modal-dialog" role="document">
-            <form id="frmupdateCategory" method="POST" class="needs-validation" novalidate>
-                <input type="hidden" name="action" id="action" value="category_update">
+            <form id="frmupdateUser" method="POST" class="needs-validation" novalidate>
+                <input type="hidden" name="action" id="update_action" value="user_update">    
             <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
-                        <h5 class="modal-title fw-bold" id="AddCategoryTitle">Update Category: <span id="update_cat_name_view"></span></h5>
-                            <input type="hidden" id="update_category_id" name="update_category_id">
+                        <h5 class="modal-title fw-bold" id="AddCategoryTitle">Update User: <span id="update_username_view"></span></h5>
+                            <input type="hidden" id="update_user_id" name="update_user_id">
                     </div>
-                    <div class="modal-body py-4 px-6" id="AddCategoryBody">
+                    <div class="modal-body py-4 px-6" id="AddUserBody">
                         <div class="mb-2">
-                            <div class="alert alert-danger w-100 d-none" id="updateCategoryAlert">
-                                <span id="updateCategoryAlertMsg"></span>
+                            <div class="alert alert-danger w-100 d-none" id="updateUserAlert">
+                                <span id="updateUserAlertMsg"></span>
                             </div>
                         </div>
-                        <div class="alert alert-info w-100" id="update_cat_name_alert">
-                            <span id="update_cat_name_alert_msg">
-                                <span>
-                                    <i class="bi bi-info-circle-fill"></i>
-                                </span>
-                                Only one word for naming category
-                            </span>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_username">Username</label>
+                            <input type="text" name="update_username" id="update_username" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a username.
+                            </div>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label" for="update_category_name">Name</label>
-                            <input type="text" name="update_category_name" id="update_category_name" class="form-control" required>
+                            <label class="form-label" for="update_email">Email</label>
+                            <input type="email" name="update_email" id="update_email" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid email address.
+                            </div>
                         </div>
                         <div class="mb-2">
-                            <label for="update_category_description">Description</label>
-                            <textarea name="update_category_description" id="update_category_description" class="form-control" required></textarea>
+                            <label class="form-label" for="update_password">Password</label>
+                            <input type="password" name="update_password" id="update_password" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a password.
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="update_password1">Password</label>
+                            <input type="password" name="update_password1" id="update_password1" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a password.
+                            </div>
                         </div>
                         <div class="modal-footer" id="AddCategoryFooter">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-secondary" id="btnAddCategory">
+                            <button type="submit" class="btn btn-secondary" id="btnAddUser">
                                 <i class="bi bi-floppy-fill"></i>
                                 Update
                             </button>
@@ -193,7 +205,7 @@ $role_type = $this_user->role_type;
     </div>
 
     <!-- Delete Category -->
-    <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog"  aria-hidden="true" style="overflow-y:auto">
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmdeleteCategory">
                 <input type="hidden" name="action" id= "action" value="category_delete">
@@ -291,7 +303,7 @@ $role_type = $this_user->role_type;
                                         <p class="card-text">${user_role_badge(username=username, role_type=role_type, active=user_active)}</p>
                                         <div class="d-flex gap-2 justify-content-between">
                                             <button class="btn btn-secondary" id="user-update-${user_id}" data-bs-toggle="modal" data-bs-target="#updateUserModal">
-                                                <i class="bi bi-pencil-square"></i> Update
+                                                <i class="bi bi-pencil-square" id="user-update-${user_id}"></i> Update
                                             </button>
                                             <button class="btn btn-dark" id="user-delete-${user_id}" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
                                                 <i class="bi bi-trash-fill"></i> Delete
@@ -316,26 +328,30 @@ $role_type = $this_user->role_type;
             });
         }
         fetchUsers();
-        
+
         // Update Loader
-        $(document).on('click', '[id^="category-update-"]', function (e) {
+        $(document).on('click', '[id^="user-update-"]', function (e) {
             e.preventDefault();
-            const update_idCategory = this.id.split("-")[2];
+            const update_idUser = this.id.split("-")[2];
+            console.log("Update User ID:", update_idUser);  
             let params = new URLSearchParams({
-                category: true,
-                id: update_idCategory
+                user: true,
+                idUser: update_idUser
             });
             $.ajax({
                 url: '/api/v1.php?' + params,
                 type: 'GET',
                 success: function(response) {
                     console.log(response);
-                    let category = response.users[0];
-
-                    document.getElementById("update_category_id").value = category.idCategory;
-                    document.getElementById("update_category_name").value = category.category_name;
-                    document.getElementById("update_cat_name_view").textContent = category.category_name;
-                    document.getElementById("update_category_description").value = category.category_description;
+                    let user = response.users[0];
+                    let form = document.getElementById("frmupdateUser");
+                    form.reset();
+                    form.classList.remove("was-validated");
+                    form.elements["action"].value = "user_update";
+                    document.getElementById("update_username_view").textContent = user.username;
+                    form.elements["update_user_id"].value = user.idUser;
+                    form.elements["update_username"].value = user.username;
+                    form.elements["update_email"].value = user.email;
                 },
                 error: function(response) {
                     console.log(response);
@@ -344,8 +360,8 @@ $role_type = $this_user->role_type;
         
         });
         
-        let frmupdateCategory = document.getElementById("frmupdateCategory");
-        frmupdateCategory.addEventListener("submit", function(e) {
+        let frmupdateUser = document.getElementById("frmupdateUser");
+        frmupdateUser.addEventListener("submit", function(e) {
             e.preventDefault();
             let formData = new FormData(this);
 
@@ -356,25 +372,25 @@ $role_type = $this_user->role_type;
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    let updateCategoryAlert = document.getElementById("updateCategoryAlert");
-                    let updateCategoryAlertMsg = document.getElementById("updateCategoryAlertMsg");
-                    updateCategoryAlertMsg.textContent = response.message;
-                    updateCategoryAlert.classList.remove("alert-info", "alert-danger");
-                    updateCategoryAlert.classList.add("alert-success");
-                    updateCategoryAlert.classList.remove("d-none");
+                    let updateUserAlert = document.getElementById("updateUserAlert");
+                    let updateUserAlertMsg = document.getElementById("updateUserAlertMsg");
+                    updateUserAlertMsg.textContent = response.message;
+                    updateUserAlert.classList.remove("alert-info", "alert-danger");
+                    updateUserAlert.classList.add("alert-success");
+                    updateUserAlert.classList.remove("d-none");
                     setTimeout(() => {
                         location.reload();
                     }, 2000);
                 },
                 error: function(response) {
-                    let updateCategoryAlert = document.getElementById("updateCategoryAlert");
-                    let updateCategoryAlertMsg = document.getElementById("updateCategoryAlertMsg");
-                    updateCategoryAlertMsg.textContent = response.responseJSON.message;
-                    updateCategoryAlert.classList.remove("alert-info", "alert-success");
-                    updateCategoryAlert.classList.add("alert-danger");
-                    updateCategoryAlert.classList.remove("d-none");
+                    let updateUserAlert = document.getElementById("updateUserAlert");
+                    let updateUserAlertMsg = document.getElementById("updateUserAlertMsg");
+                    updateUserAlertMsg.textContent = response.responseJSON.message;
+                    updateUserAlert.classList.remove("alert-info", "alert-success");
+                    updateUserAlert.classList.add("alert-danger");
+                    updateUserAlert.classList.remove("d-none");
                     setTimeout(() => {
-                        updateCategoryAlert.classList.add("d-none");
+                        updateUserAlert.classList.add("d-none");
                     }, 2000);
                 }
             });
