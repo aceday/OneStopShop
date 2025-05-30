@@ -415,6 +415,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ":quantity" => $quantity
             ));
 
+            // Get the last inserted ID
+            $idProduct = $pdo->lastInsertId();
             // Image
             $image_path = "";
             $extensions = ["jpg", "jpeg", "png", "gif"];

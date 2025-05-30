@@ -64,9 +64,9 @@ if (isset($_GET['id'])) {
                             <div class="card">
                                 <div class="m-4">
                                     <img class="w-100 h-100"
-                                        src="https://avatars.githubusercontent.com/u/68708541"
-                                        alt="aceday"
-                                        style="border-radius: 50%; object-fit: cover; max-height: 200px;"
+                                        src="/public/assets/devs/1.png"
+                                        alt="marc"
+                                        style="border-radius: 50%; object-fit: cover; max-height: 300px;"
                                 >
                                 </div>
                                 <div class="m-4 text-center">
@@ -78,9 +78,9 @@ if (isset($_GET['id'])) {
                             <div class="card">
                                 <div class="m-4">
                                     <img class="w-100 h-100"
-                                        src="https://avatars.githubusercontent.com/u/68708541"
-                                        alt="aceday"
-                                        style="border-radius: 50%; object-fit: cover; max-height: 200px;"
+                                        src="/public/assets/devs/3.png"
+                                        alt="mic"
+                                        style="border-radius: 50%; object-fit: cover; max-height: 300px;"
                                 >
                                 </div>
                                 <div class="m-4 text-center">
@@ -92,9 +92,9 @@ if (isset($_GET['id'])) {
                             <div class="card">
                                 <div class="m-4">
                                     <img class="w-100 h-100"
-                                        src="https://avatars.githubusercontent.com/u/68708541"
-                                        alt="aceday"
-                                        style="border-radius: 50%; object-fit: cover; max-height: 200px;"
+                                        src="/public/assets/devs/2.png"
+                                        alt="lester"
+                                        style="border-radius: 50%; object-fit: cover; max-height: 300px;"
                                 >
                                 </div>
                                 <div class="m-4 text-center">

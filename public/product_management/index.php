@@ -756,7 +756,10 @@ $role_type = $this_user->role_type;
             console.log('Price: ', add_product_price);
             console.log('Original Price: ', add_product_original_price);
             console.log('Quantity: ', add_product_quantity);
-
+            
+            let AddProductAlertMsg = document.getElementById("AddProductAlertMsg");
+            let AddProductAlert = document.getElementById("AddProductAlert");
+            
             $.ajax({
                 url: '/api/v1.php',
                 type: 'POST',
@@ -764,8 +767,6 @@ $role_type = $this_user->role_type;
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    let AddProductAlertMsg = document.getElementById("AddProductAlertMsg");
-                    let AddProductAlert = document.getElementById("AddProductAlert");
                     AddProductAlertMsg.textContent = response.message;
                     AddProductAlert.classList.remove("alert-danger", "alert-info");
                     AddProductAlert.classList.add("alert-success");
@@ -776,12 +777,11 @@ $role_type = $this_user->role_type;
                 },  
                 error: function(response) {
                     console.log(response.responseJSON);
-                    let alert = document.getElementById("AddProductAlert");
-                    let alertMsg = document.getElementById("AddProductAlertMsg");
-                    alertMsg.innerHTML = response.responseJSON.message;
-                    alert.classList.remove("alert-success", "alert-info");
-                    alert.classList.add("alert-danger");
-                    alert.classList.remove("d-none");
+                    // AddProductAlertMsg.innerHTML = response.responseJSON.message;
+                    // AddProductAlert.classList.remove("alert-success", "alert-info");
+                    // AddProductAlert.classList.add("alert-danger");
+                    // AddProductAlert.classList.remove("d-none");
+                    // console.log("XHR: ", response);
                 }
             });
         });
