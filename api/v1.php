@@ -885,15 +885,81 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
         exit;
+    } else if ($_POST['action'] == "user_create") {
+        if (!isset($_POST['create_username']) || !isset($_POST['create_email']) ||
+            !isset($_POST['create_password']) || empty($_POST['create_username']) || 
+            empty($_POST['create_email']) || empty($_POST['create_password'])) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input username, email and password"
+            ));
+            http_response_code(400);
+            $pdo = null;
+            exit;
+        }
+
+        $username = $_POST['create_username'];
+        $email = $_POST['create_email'];
+        $password = $_POST['create_password'];
+
+        // Check if user already exists
+        try {
+            $cur = $pdo->prepare("SELECT * FROM users WHERE username = :username OR email = :email");
+            $cur->execute(array(
+                ":username" => $username,
+                ":email" => $email
+            ));
+            $user = $cur->fetch(PDO::FETCH_ASSOC);
+            if ($user) {
+                echo json_encode(array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "User already exists"
+                ));
+                http_response_code(409);
+                $pdo = null;
+                exit;
+            } else {
+                // Insert new user
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $cur = $pdo->prepare("INSERT INTO users (username, email, password, role_type) VALUES (:username, :email, :password, 'standard')");
+                $cur->execute(array(
+                    ":username" => $username,
+                    ":email" => $email,
+                    ":password" => $hashed_password
+                ));
+
+                echo json_encode(array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "User created successfully"
+                ));
+                http_response_code(201);
+                $pdo = null;
+                exit;
+            }
+        } catch (Exception $e) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 500,
+                "message" => "Internal Server Error: " . $e->getMessage()
+            ));
+            http_response_code(500);
+            $pdo = null;
+            exit;
+        }
     } else if ($_POST['action'] == "user_update") {
         if (!isset($_POST['update_username']) || !isset($_POST['update_email']) ||
-            !isset($_POST['update_password'])) {
+            !isset($_POST['update_password']) || empty($_POST['update_username']) || 
+            empty($_POST['update_email']) || empty($_POST['update_password'])) {
             echo json_encode(array(
                 "status" => "error",
                 "status_code" => 400,
                 "message" => "Please input username, email and password"
             ));
             $pdo = null;
+            http_response_code(400);
             exit;
         }
 
@@ -1031,7 +1097,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $sql_cmd = "SELECT COUNT(*) as total_admins
                     FROM users
                     WHERE role_type = 'admin'";
-        $cur = $pdo->prepare($cur);
+        $cur = $pdo->prepare($sql_cmd);
         $cur->execute();
         $total_admins = $cur->fetch(PDO::FETCH_ASSOC)['total_admins'];
         if ($total_admins <= 1) {
@@ -1048,11 +1114,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         try {
             $user_id = $_POST['delete_user_id'];
     
-            $sql_cmd = "DELETE FROM users WHERE user_id = :user_id";
+            $sql_cmd = "DELETE FROM users WHERE idUser = :delete_user_id";
     
             // Execute
             $cur = $pdo->prepare($sql_cmd);
-            $cur->bindValue(":user_id", $user_id);
+            $cur->bindValue(":delete_user_id", $user_id);
             $cur->execute();
     
             if ($cur->rowCount() > 0) {
