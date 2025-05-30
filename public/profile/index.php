@@ -62,7 +62,7 @@ $user_image = $this_user->user_image;
                                     <div class="w-100">
                                     <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
                                         <img 
-                                            src="<?php echo $user_image ?>" 
+                                            src="" 
                                             alt="<?php echo $username ?>" 
                                             id="this_user_image"
                                             style="
@@ -99,10 +99,10 @@ $user_image = $this_user->user_image;
                                             Account Settings
                                         </div>
                                         <div class="card-body">
-                                            <div class="alert alert-info">
+                                            <!-- <div class="alert alert-info">
                                                 <i class="bi bi-info-circle-fill"></i>
                                                 After some changes, you need to login again
-                                            </div>
+                                            </div> -->
                                             <div class="row">
                                                 <div class="col-12">
                                                     <div class="alert alert-info d-none" id="updateProfileAlert">
@@ -162,6 +162,23 @@ $user_image = $this_user->user_image;
     </body>
 
     <script>
+        let this_user_image = document.getElementById("this_user_image");
+        function fetchUser() {
+            let param = new URLSearchParams({
+                user: true,
+                idUser: this_user_id
+            });
+            $.ajax({
+                url: '/api/v1.php?' + param,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    this_user_image.src = response.users[0].user_image;
+                }
+            })
+        }
+
+        fetchUser();
         (() => {
             'use strict'
 

@@ -970,6 +970,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $decode_jwt = JWT::decode($_COOKIE["auth_token"], new Key($jwt_secret_key, 'HS256'));
             $user_id = $decode_jwt->user_id;
+            
             // Image
             $image_path = "";
             $extensions = ["jpg", "jpeg", "png", "gif"];
@@ -1513,7 +1514,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         //     exit;
         // }
 
-        $sql_cmd = "SELECT idUser, username, email, status, role_type
+        $sql_cmd = "SELECT idUser, username, email, status, role_type, user_image
                     FROM users
                     WHERE 1=1";
         $params = [];
