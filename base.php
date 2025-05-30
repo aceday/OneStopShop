@@ -46,6 +46,7 @@ finally
 
 function head_css() {
     echo '
+        <link rel="icon" href="/public/assets/favicon.png" type="image/x-icon" />
         <link href="/node_modules/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
         <link href="/public/css/styles.css" rel="stylesheet" />
     ';

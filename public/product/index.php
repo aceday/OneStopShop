@@ -270,6 +270,7 @@ if (isset($_GET['id'])) {
                                 <label for="payment_type">Payment Type</label>
                             </div>
                         </div>
+                        <input type="hidden" name="product_quantity" id="in_product_quantity_set" value="1" />
                         <div class="modal-footer" id="buyNowFooter">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-success" id="btnBuyNowSubmit">
@@ -348,21 +349,24 @@ if (isset($_GET['id'])) {
         let buyToggle = document.getElementById("buyToggle");
         let product_quantity_set_value = document.getElementById("product_quantity_set_value");
         let product_quantity_set_value_dec = document.getElementById("product_quantity_set_value_dec");
-        let product_quantity_set_value_inc = document.getElementById("product_quantity_set_value_inc");
         product_quantity_set_value_dec.addEventListener("click", function(e) {
             e.preventDefault();
             let value = parseInt(product_quantity_set_value.value);
             if (value > 1) {
-                product_quantity_set_value.value = value - 1;
+                product_quantity_set_value.value -= 1;
+                in_product_quantity_set = parseInt(product_quantity_set_value.value);
             }
+            console.log(this_product_quantity_set); 
         });
         product_quantity_set_value_inc.addEventListener("click", function(e) {
             e.preventDefault();
             let value = parseInt(product_quantity_set_value.value);
             if (value < this_product_stock_max) {
-                this_product_quantity_set =  value + 1;
+                this_product_quantity_set += 1;
                 product_quantity_set_value.value = this_product_quantity_set;
+                in_product_quantity_set = parseInt(product_quantity_set_value.value);
             }
+            console.log(this_product_quantity_set);
         });
 
         let btnAddCart = document.getElementById("btnAddCart");
@@ -381,7 +385,6 @@ if (isset($_GET['id'])) {
                     idUser : this_user_id,
                     idProduct : this_product_id,
                     quantity : this_product_quantity_set
-
                 }),
                 success: function(response) {
                     console.log(response);
@@ -406,6 +409,9 @@ if (isset($_GET['id'])) {
             let formData = new FormData(frmBuyNow);
             formData.set("product_id", this_product_id);
             formData.set("product_quantity", product_quantity_set_value.value);
+            let in_product_quantity_set = document.getElementById("in_product_quantity_set");
+            in_product_quantity_set.value = product_quantity_set_value.value;
+
         });
         frmBuyNow.addEventListener('submit', function (e) {
             e.preventDefault();

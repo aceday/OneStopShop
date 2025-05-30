@@ -807,8 +807,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 // Create order so
 
-                $cur = $pdo->prepare("INSERT INTO orders (customer_name, customer_address, customer_phone, deliver_type, payment_type, `status`, user_id, checkout_type, product_quantity, product_ids)
-                                        VALUES (:customer_name, :customer_address, :customer_phone, :delivery_type, :payment_type, 'pending', :user_id, :checkout_type, :product_quantity, :product_id)");
+                $cur = $pdo->prepare("INSERT INTO orders (customer_name, customer_address, customer_phone, deliver_type, payment_type, `status`, user_id, checkout_type, product_quantity, product_ids, total_payment)
+                                        VALUES (:customer_name, :customer_address, :customer_phone, :delivery_type, :payment_type, 'pending', :user_id, :checkout_type, :product_quantity, :product_id, :total_payment)");
                 $cur->execute(array(
                     ":customer_name" => $customer_name,
                     ":customer_address" => $customer_address,
@@ -818,7 +818,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     ":user_id" => $user_id,
                     ":checkout_type" => "buy",
                     ":product_quantity" => $product_quantity,
-                    ":product_id" => $product_id
+                    ":product_id" => $product_id,
+                    ":total_payment" => ($product['product_price_now'] * $product_quantity),
                 ));
                 $order_id = $pdo->lastInsertId();
 
@@ -1166,6 +1167,128 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "message" => $e->getMessage()
             ));
             http_response_code(500);
+            $pdo = null;
+            exit;
+        }
+
+    } else if ($_POST['action'] == "order_cancel") {
+        if (!isset($_POST['cancel_order_id']) || empty($_POST['cancel_order_id'])) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Your order was aleady cancelled"
+            ));
+            http_response_code(400);
+            $pdo = null;
+            exit;
+        }
+
+        $order_id = $_POST['cancel_order_id'];
+
+        // Check if order exists
+        $sql_cmd = "SELECT *
+                    FROM orders
+                    WHERE idOrder = :idOrder";
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idOrder", $order_id);
+        $cur->execute();
+        $order = $cur->fetch(PDO::FETCH_ASSOC);
+        if (!$order) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "Order not found"
+            ));
+            http_response_code(404);
+            $pdo = null;
+            exit;
+        }
+
+        // Cancel the order
+        $sql_cmd = "UPDATE orders
+                    SET status = 'cancelled'
+                    WHERE idOrder = :idOrder";
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idOrder", $order_id);
+        $cur->execute();
+
+        if ($cur->rowCount() > 0) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "Order cancelled successfully"
+            ));
+            http_response_code(200);
+            $pdo = null;
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "Order not found or already cancelled"
+            ));
+            http_response_code(404);
+            $pdo = null;
+            exit;
+        }
+    
+    } else if ($_POST['action'] == "order_success") {
+        if (!isset($_POST['success_order_id']) || empty($_POST['success_order_id'])) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 400,
+                "message" => "Please input order id"
+            ));
+            http_response_code(400);
+            $pdo = null;
+            exit;
+        }
+
+        $order_id = $_POST['success_order_id'];
+
+        // Check if order exists
+        $sql_cmd = "SELECT *
+                    FROM orders
+                    WHERE idOrder = :idOrder";
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idOrder", $order_id);
+        $cur->execute();
+        $order = $cur->fetch(PDO::FETCH_ASSOC);
+        if (!$order) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "Order not found"
+            ));
+            http_response_code(404);
+            $pdo = null;
+            exit;
+        }
+
+        // Mark the order as successful
+        $sql_cmd = "UPDATE orders
+                    SET status = 'completed'
+                    WHERE idOrder = :idOrder";
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":idOrder", $order_id);
+        $cur->execute();
+
+        if ($cur->rowCount() > 0) {
+            echo json_encode(array(
+                "status" => "success",
+                "status_code" => 200,
+                "message" => "Order marked as successful"
+            ));
+            http_response_code(200);
+            $pdo = null;
+            exit;
+        } else {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "Order not found or already marked as successful"
+            ));
+            http_response_code(404);
             $pdo = null;
             exit;
         }
@@ -1559,7 +1682,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
     } else if (isset($_GET['orders'])) {
-        $sql_cmd = "SELECT o.idOrder, o.product_ids, o.status, o.customer_name, o.customer_address, o.deliver_type, o.payment_type, o.customer_phone, o.created_at, p.product_name, p.product_price_now
+        $sql_cmd = "SELECT o.idOrder, o.product_ids, o.status, o.customer_name, o.customer_address, o.deliver_type, o.payment_type, o.customer_phone, o.created_at, p.product_name, p.product_price_now, o.total_payment
                     FROM orders o
                     LEFT JOIN products p ON o.product_ids = p.idProduct
                     WHERE 1=1";
@@ -1573,6 +1696,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $types .= "i";
         }
 
+        // Order -> delivery type
+        if (isset($_GET['delivery_type'])) {
+            $sql_cmd .= " AND deliver_type LIKE :delivery_type";
+            $params[":delivery_type"] = "%" . $_GET['delivery_type'] . "%";
+            $types .= "s";
+        }
+
         // Order -> status
         if (isset($_GET['status'])) {
             $sql_cmd .= " AND status LIKE :status";
@@ -1580,6 +1710,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $types .= "s";
         }
         
+        // Order -> claim TINYINT
+        if (isset($_GET['claim'])) {
+            $sql_cmd .= " AND claim = :claim";
+            $params[":claim"] = $_GET['claim'];
+            $types .= "i";
+        }
 
         // Order -> user_id
         if (isset($_GET['user_id'])) {
