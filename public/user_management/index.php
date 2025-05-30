@@ -218,19 +218,17 @@ $role_type = $this_user->role_type;
         <div class="modal-dialog" role="document">
             <form method="POST" id="frmdeleteUser">
                 <input type="hidden" name="action" id= "action" value="user_delete">
-                <input type="text" name="delete_user_id" id="delete_user_id" class="d-none">
+                <input type="hidden" name="delete_user_id" id="delete_user_id" class="d-none">
                 <div class="modal-content">
                     <div class="modal-header bg-orange-custom d-flex justify-content-start">
                         <h5 class="modal-title fw-bold">
-                            Delete Category: <span id="delete_username_view"></span>
+                            Delete User: <span id="delete_username_view"></span>
                         </h5>
                     </div>
                     <div class="modal-body p-4 px-6" id="deleteCategoryBody">
-                        <div class="mb-4">
-                            <div class="mb-2">
-                                <div class="alert alert-danger w-100 d-none" id="deleteUserAlert">
-                                    <span id="deleteUserAlertMsg"></span>
-                                </div>
+                        <div class="mb-2">
+                            <div class="alert alert-danger w-100 d-none" id="deleteUserAlert">
+                                <span id="deleteUserAlertMsg"></span>
                             </div>
                         </div>
                         <div class="mb-4">
@@ -446,20 +444,19 @@ $role_type = $this_user->role_type;
         // Delete Loader
         $(document).on('click', '[id^="user-delete-"]', function (e) {
             e.preventDefault();
-            let formData = new FormData(this);
-            console.log("Form Data:", formData.get("update_user_id"));
             const delete_idCategory = this.id.split("-")[2];
             let params = new URLSearchParams({
                 user: true,
                 idUser: delete_idCategory
             });
+            console.log("Delete User ID:", delete_idCategory);
             $.ajax({
                 url: '/api/v1.php?' + params,
                 type: 'GET',
                 success: function(response) {
                     console.log(response);
                     let user = response.users[0];
-                    document.getElementById("delete_user_id").value = user.idCategory;
+                    document.getElementById("delete_user_id").value = user.idUser;
                     document.getElementById("delete_username_view").textContent = user.username;
                     document.getElementById("delete_username").textContent = user.username;
                 },
@@ -487,8 +484,7 @@ $role_type = $this_user->role_type;
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    let deleteUserAlert = document.getElementById("deleteCategoryAlert");
-                    let deleteUserAlertMsg = document.getElementById("deleteCategoryAlertMsg");
+                    console.log(response);
                     deleteUserAlertMsg.textContent = response.message;
                     deleteUserAlert.classList.remove("alert-info", "alert-danger");
                     deleteUserAlert.classList.add("alert-success");

@@ -1111,6 +1111,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
         }
 
+        // Check if user exists
+        $sql_cmd = "SELECT *
+                    FROM users
+                    WHERE idUser = :delete_user_id";
+        $cur = $pdo->prepare($sql_cmd);
+        $cur->bindValue(":delete_user_id", $_POST['delete_user_id']);
+        $cur->execute();
+        $user = $cur->fetch(PDO::FETCH_ASSOC);
+        if (!$user) {
+            echo json_encode(array(
+                "status" => "error",
+                "status_code" => 404,
+                "message" => "User not found"
+            ));
+            http_response_code(404);
+            $pdo = null;
+            exit;
+        }
         try {
             $user_id = $_POST['delete_user_id'];
     
