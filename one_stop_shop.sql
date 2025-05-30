@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `category_name` varchar(50) DEFAULT NULL,
   `category_description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`idCategory`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DELETE FROM `categories`;
 INSERT INTO `categories` (`idCategory`, `category_name`, `category_description`) VALUES
@@ -58,7 +58,9 @@ INSERT INTO `categories` (`idCategory`, `category_name`, `category_description`)
 	(3, 'Electronics', ''),
 	(4, 'Beauty', ''),
 	(5, 'Appliances', 'ii'),
-	(7, 'Dairy', 'Good');
+	(7, 'Dairy', 'Good'),
+	(8, 'Dress', 'Clothes for dress people'),
+	(11, 'Power', 'Use for power your life');
 
 DROP TABLE IF EXISTS `inventory`;
 CREATE TABLE IF NOT EXISTS `inventory` (
@@ -67,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `toStock` int DEFAULT '0',
   `comment` text,
   PRIMARY KEY (`idInventory`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DELETE FROM `inventory`;
 INSERT INTO `inventory` (`idInventory`, `fromStock`, `toStock`, `comment`) VALUES
@@ -80,7 +82,31 @@ INSERT INTO `inventory` (`idInventory`, `fromStock`, `toStock`, `comment`) VALUE
 	(9, 1, 1, 'ADDED: 1x Sample 102'),
 	(10, 1, 1, 'ADDED: 1x Sam 103'),
 	(11, 1, 1, 'ADDED: 1x Samsung A12'),
-	(12, 1, 1, 'ADDED: 1x Redmi Note 13');
+	(12, 1, 1, 'ADDED: 1x Redmi Note 13'),
+	(13, 500, 500, 'ADDED: 500x Sample 0001'),
+	(14, 45, 45, 'ADDED: 45x Sample 101'),
+	(15, 400, 400, 'ADDED: 400x Queen Pantera Tee'),
+	(16, 400, 400, 'ADDED: 400x Queen Pantera Tee'),
+	(17, 400, 400, 'ADDED: 400x Queen Pantera Tee'),
+	(18, 100, 100, 'ADDED: 100x Shock Pants'),
+	(19, 500, 500, 'ADDED: 500x Sample 0001'),
+	(20, 500, 500, 'ADDED: 500x Sample 0001'),
+	(21, 500, 500, 'ADDED: 500x Sample 0001'),
+	(22, 500, 500, 'ADDED: 500x Sample 0001'),
+	(23, 500, 500, 'ADDED: 500x Sample 0001'),
+	(24, 500, 500, 'ADDED: 500x Sample 0001'),
+	(25, 500, 500, 'ADDED: 500x Sample 0001'),
+	(26, 500, 500, 'ADDED: 500x Sample 0001'),
+	(27, 500, 500, 'ADDED: 500x Sample 0001'),
+	(28, 500, 500, 'ADDED: 500x Sample 0001'),
+	(29, 500, 500, 'ADDED: 500x Sample 0001'),
+	(30, 500, 500, 'ADDED: 500x Sample 0001'),
+	(31, 10, 10, 'ADDED: 10x Buds'),
+	(32, 10, 10, 'ADDED: 10x Bud2'),
+	(33, 7, 7, 'ADDED: 7x Buds0003'),
+	(34, 500, 500, 'ADDED: 500x Sample 0001'),
+	(35, 500, 500, 'ADDED: 500x Sample 0002'),
+	(36, 5, 5, 'ADDED: 5x Trial');
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE IF NOT EXISTS `orders` (
@@ -89,44 +115,37 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `cart_ids` text,
   `status` enum('completed','pending','cancelled','return') DEFAULT NULL,
   `reason` text,
-  `name` varchar(50) DEFAULT NULL,
-  `address` varchar(50) DEFAULT NULL,
+  `customer_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `customer_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `deliver_type` enum('pickup','deliver') DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `payment_type` enum('cod','card','gcash') DEFAULT NULL,
-  `contact_no` varchar(20) DEFAULT NULL,
+  `customer_phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `product_quantity` int NOT NULL DEFAULT (0),
+  `claim` tinyint NOT NULL DEFAULT (0),
   `created_at` datetime DEFAULT (now()),
+  `checkout_type` enum('buy','cart') DEFAULT NULL,
+  `total_payment` decimal(20,2) DEFAULT '0.00',
   PRIMARY KEY (`idOrder`) USING BTREE,
-  KEY `idx_transactions_name` (`name`) USING BTREE,
   KEY `idx_transactions_payment_type` (`payment_type`) USING BTREE,
   KEY `fk_orders_user_id` (`user_id`),
+  KEY `idx_transactions_name` (`customer_name`) USING BTREE,
   CONSTRAINT `fk_orders_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`idUser`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DELETE FROM `orders`;
-INSERT INTO `orders` (`idOrder`, `product_ids`, `cart_ids`, `status`, `reason`, `name`, `address`, `deliver_type`, `user_id`, `payment_type`, `contact_no`, `created_at`) VALUES
-	(3, '11', NULL, 'pending', NULL, 'Marc', 'Parkway', 'pickup', NULL, 'cod', '0909', '2025-05-24 17:37:23'),
-	(4, '11', NULL, 'pending', NULL, 'Alsaki', 'BM', 'pickup', NULL, 'cod', '123', '2025-05-24 17:37:23'),
-	(5, '11', NULL, 'pending', NULL, 'Alsaki', 'BM', 'pickup', NULL, 'card', '0909', '2025-05-24 17:37:23'),
-	(6, '11', NULL, 'pending', NULL, 'Alsaki', 'BM', 'pickup', NULL, 'cod', '0909', '2025-05-24 17:37:23'),
-	(7, '11', NULL, 'pending', NULL, 'aLSAKI', 'KJ', 'pickup', NULL, 'cod', '99', '2025-05-24 17:37:23'),
-	(8, '11', NULL, 'pending', NULL, 'Marc', 'Parkway', 'pickup', NULL, 'cod', '0909', '2025-05-24 17:37:23'),
-	(9, '11', NULL, 'pending', NULL, 'aLSAKI', 'KJ', 'pickup', NULL, 'cod', '99', '2025-05-24 17:37:23'),
-	(10, '11', NULL, 'pending', NULL, 'aLSAKI', 'KJ', 'pickup', NULL, 'cod', '99', '2025-05-24 17:37:23'),
-	(11, '11', NULL, 'pending', NULL, 'aLSAKI', 'KJ', 'pickup', NULL, 'cod', '99', '2025-05-24 17:37:23'),
-	(12, '11', NULL, 'pending', NULL, 'aLSAKI', 'KJ', 'pickup', NULL, 'cod', '99', '2025-05-24 17:37:23'),
-	(13, '11', NULL, 'pending', NULL, 'sam', 'wawe', 'pickup', NULL, 'cod', '09', '2025-05-24 17:37:23'),
-	(14, '11', NULL, 'pending', NULL, 'Sample', 'BM', 'pickup', NULL, 'cod', '09088', '2025-05-24 17:37:23'),
-	(15, '11', NULL, 'pending', NULL, 'Legit', 'BM', 'pickup', NULL, 'cod', '9898', '2025-05-24 17:37:23'),
-	(16, '11', NULL, 'pending', NULL, 'Goods', '09', 'pickup', NULL, 'cod', '09', '2025-05-24 17:37:23'),
-	(17, '11', NULL, 'pending', NULL, 'Marc', 'Parkway', 'pickup', 6, 'cod', '0909', '2025-05-24 17:37:23'),
-	(18, '12', NULL, 'pending', NULL, 'Marc', 'PPC', 'pickup', NULL, 'cod', '0909123', '2025-05-24 22:05:32'),
-	(19, '11', NULL, 'pending', NULL, 'Sam', 'BM', 'pickup', NULL, 'card', '090912', '2025-05-25 11:32:12'),
-	(20, '11', NULL, 'pending', NULL, 'Sam', 'M', 'deliver', NULL, 'card', '09', '2025-05-25 11:33:05'),
-	(21, '11', NULL, 'pending', NULL, 'Haaha', '98', 'pickup', NULL, 'card', '98', '2025-05-25 11:34:27'),
-	(22, '11', NULL, 'pending', NULL, 'Haaha', '98', 'pickup', NULL, 'card', '98', '2025-05-25 11:34:38'),
-	(23, '11', NULL, 'pending', NULL, 'Sam', '98', 'pickup', 6, 'cod', '88', '2025-05-25 11:38:34'),
-	(24, '11', NULL, 'pending', NULL, 'Sam', '98', 'pickup', 6, 'cod', '88', '2025-05-25 11:38:48');
+INSERT INTO `orders` (`idOrder`, `product_ids`, `cart_ids`, `status`, `reason`, `customer_name`, `customer_address`, `deliver_type`, `user_id`, `payment_type`, `customer_phone`, `product_quantity`, `claim`, `created_at`, `checkout_type`, `total_payment`) VALUES
+	(48, '6', NULL, 'pending', NULL, 'Lester', 'Les City', 'pickup', 6, 'cod', '09123456789', 1, 0, '2025-05-30 12:02:41', 'buy', 350.00),
+	(49, '12', NULL, 'cancelled', NULL, 'Lester', 'Les', 'pickup', 6, 'cod', '090912334566', 1, 0, '2025-05-30 13:58:15', 'buy', 500.00),
+	(50, '12', NULL, 'pending', NULL, 'Les1', 'BMX', 'pickup', 6, 'card', '0909123', 1, 0, '2025-05-30 15:48:09', 'buy', 500.00),
+	(51, '12', NULL, 'pending', NULL, 'Les1', 'BMX', 'pickup', 6, 'card', '0909123', 1, 0, '2025-05-30 15:48:40', 'buy', 500.00),
+	(52, '12', NULL, 'pending', NULL, '32', 'NX', 'pickup', 6, 'cod', '09023124321', 1, 0, '2025-05-30 15:55:37', 'buy', 500.00),
+	(53, '19', NULL, 'pending', NULL, 'Mic2', 'PPC', 'pickup', 6, 'cod', '0909123', 2, 0, '2025-05-30 15:57:09', 'buy', 600.00),
+	(54, '12', NULL, 'pending', NULL, 'Lester', 'BM', 'pickup', 6, 'card', '09123456', 1, 0, '2025-05-30 15:58:16', 'buy', 500.00),
+	(55, '12', NULL, 'pending', NULL, 'MX', '1234', 'pickup', 6, 'cod', '11', 1, 0, '2025-05-30 16:01:49', 'buy', 500.00),
+	(56, '12', NULL, 'pending', NULL, 'Mas', 'BMX', 'pickup', 6, 'cod', '092134', 5, 0, '2025-05-30 16:03:50', 'buy', 2500.00),
+	(57, '14', NULL, 'pending', NULL, 'Sir Web', 'San Pedro', 'pickup', 18, 'cod', '09123456789', 18, 0, '2025-05-30 16:24:46', 'buy', 5400.00),
+	(58, '10', NULL, 'pending', NULL, 'Intel', 'AMD', 'pickup', 19, 'cod', '09123456789', 8, 0, '2025-05-30 16:41:30', 'buy', 6000.00);
 
 DROP TABLE IF EXISTS `products`;
 CREATE TABLE IF NOT EXISTS `products` (
@@ -139,25 +158,38 @@ CREATE TABLE IF NOT EXISTS `products` (
   `product_description` text,
   `product_quantity` int DEFAULT NULL,
   `product_status` enum('sale','out','preview') DEFAULT NULL,
-  `product_default_image` int DEFAULT NULL,
+  `product_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   PRIMARY KEY (`idProduct`) USING BTREE,
   UNIQUE KEY `Index 4` (`product_code`),
   KEY `fk_prod_cate_category_id` (`product_category`),
-  KEY `fk_prod_prodImgId` (`product_default_image`),
-  CONSTRAINT `fk_prod_cate_category_id` FOREIGN KEY (`product_category`) REFERENCES `categories` (`idCategory`),
-  CONSTRAINT `fk_prod_prodImgId` FOREIGN KEY (`product_default_image`) REFERENCES `products_image` (`idProductImg`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_prod_cate_category_id` FOREIGN KEY (`product_category`) REFERENCES `categories` (`idCategory`)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DELETE FROM `products`;
-INSERT INTO `products` (`idProduct`, `product_code`, `product_name`, `product_category`, `product_price_now`, `product_price_original`, `product_description`, `product_quantity`, `product_status`, `product_default_image`) VALUES
-	(2, 'SAM-0001', 'Sample', 2, 1.00, 1.00, 'Sample Description', 500, NULL, NULL),
+INSERT INTO `products` (`idProduct`, `product_code`, `product_name`, `product_category`, `product_price_now`, `product_price_original`, `product_description`, `product_quantity`, `product_status`, `product_image`) VALUES
 	(3, 'SAM-0002', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(4, 'SAM-0003', 'Sample 3', NULL, NULL, NULL, NULL, 150, NULL, NULL),
-	(5, 'SAM-0005', 'Sample', 2, 1.00, 1.00, 'Sample Description', 500, NULL, NULL),
-	(6, 'SAM-0005  ', 'Sample', 2, 1.00, 1.00, 'Sample Description', 500, NULL, NULL),
-	(10, 'SAM-0103', 'Sam 103', 2, 1.00, 500.00, 'l;;l', 1, NULL, NULL),
-	(11, 'SM-A125F', 'Samsung A12', 3, 8000.00, 8000.00, 'Sale self', 979, NULL, NULL),
-	(12, 'RM-2213', 'Redmi Note 13 NFC', 3, 8000.00, 11000.00, '8GB/256GB', 0, NULL, NULL);
+	(5, 'BW-0001', 'Middle Ground Tanktop', 2, 550.00, 1000.00, 'Type: Tank \r\nColor: Black\r\nSize: Small, Medium, Larg, XL\r\nDescription:\r\n- Silkscreen\r\n- Material: Cotton and Polyester Blend\r\n- Made in the Philippines', 0, NULL, '/data/image/5/1.jpg'),
+	(6, 'BW-0002', 'Range Shorts', 8, 350.00, 400.00, 'Type:  Short\r\nColor: White\r\nSize: Small, Medium, Larg, XL\r\nDescription: Fullmax Fabric', 14, NULL, '/data/image/6/2.jpg'),
+	(10, 'BW-0003', 'Shock Hoodle', 8, 750.00, 1000.00, 'Type:  Hoodie\r\nColor: Black\r\nSize: Small, Medium, Larg, XL\r\nDescription: Fleece Material', 2, NULL, '/data/image/10/3.jpg'),
+	(11, 'BW-0004', 'Lock Loaded Tee', 8, 750.00, 800.00, 'Type:  T-shirt \r\nColor: White\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 15, NULL, '/data/image/11/4.jpg'),
+	(12, 'BW-0005', 'Oval Standard Tee', 8, 500.00, 1500.00, 'Type:  T-shirt \r\nColor: Black\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 489, NULL, '/data/image/12/5.jpg'),
+	(13, 'BW-0007', 'Dark Route Shorts', 8, 300.00, 500.00, 'Type:  Short\r\nColor: White\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 39, NULL, '/data/image/13/6.jpg'),
+	(14, 'BW-0008', 'Outlined Tee', 8, 300.00, 500.00, 'Type:  T-shirt \r\nColor: White, Black\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 12, NULL, '/data/image/14/7.jpg'),
+	(15, 'BW-0009', 'Queen Pantera Tee', 8, 400.00, 600.00, 'Type:  T-shirt \r\nColor: Black \r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 300, NULL, '/data/image/15/8.jpg'),
+	(18, 'BW-0011', 'Shock Pants', 8, 500.00, 600.00, 'Type:   Pants\r\nColor: Black\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 40, NULL, '/data/image/18/9.jpg'),
+	(19, 'BW-0012', 'Skull Race Tee', 8, 300.00, 500.00, 'Type:  T-shirt \r\nColor: Black\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 58, NULL, '/data/image/19/10.jpg'),
+	(20, 'BW-0013', 'Natural Blossom Tee', 8, 350.00, 500.00, 'Type:  T-shirt \r\nColor: Black\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 30, NULL, '/data/image/20/11.jpg'),
+	(21, 'BW-0014', 'Hope Worship Tee', 8, 550.00, 1000.00, 'Type:  T-shirt \r\nColor: Black\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton', 5, NULL, '/data/image/21/12.jpg'),
+	(22, 'BW-0015', ' Majestic Valiant Tee ', 8, 450.00, 500.00, 'Type:  T-shirt \r\nColor: Black\r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 5, NULL, '/data/image/22/13.jpg'),
+	(23, 'BW-0016', 'Spiral Vision Tee', 8, 300.00, 500.00, 'Type:  T-shirt \r\nColor: White, Black \r\nSize: Small, Medium, Larg, XL\r\nDescription: Cotton', 10, NULL, '/data/image/23/14.jpg'),
+	(24, 'BW-0017', 'Weaponized Shorts', 7, 200.00, 550.00, 'Type:  Short\r\nColor: Black\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton', 15, NULL, '/data/image/24/15.jpg'),
+	(25, 'BW-0018', 'Middle ground TankTop', 8, 400.00, 600.00, 'Type:  Tank\r\nColor: Black\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton', 20, NULL, '/data/image/25/16.jpg'),
+	(26, 'BW-0019', 'Ebony Long sleeve ', 8, 750.00, 800.00, 'Type:  Long sleeve \r\nColor: Black\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton', 45, NULL, '/data/image/26/17.jpg'),
+	(27, 'BW-0020', '13th Blitz Type:  Shirt ', 8, 500.00, 700.00, 'Type:  Shirt \r\nColor: Black Gray\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton', 50, NULL, '/data/image/27/18.jpg'),
+	(28, 'BW-0021', 'Whitex Sleeve', 8, 399.00, 500.00, 'Type:  Long Sleeve\r\nColor: White\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton', 35, NULL, '/data/image/28/19.jpg'),
+	(29, 'BW-0022', 'Cranium Polo', 8, 499.00, 799.00, 'Type:  Long Sleeve\r\nColor: Black\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton\r\n', 10, NULL, '/data/image/29/20.jpg'),
+	(30, 'BW-0023', 'Triple Band Tee', 8, 299.00, 499.00, 'Type:  T-shirt \r\nColor: Black, White, Gray\r\nSize: Small, Medium, Large, XL\r\nDescription: Cotton\r\n', 50, NULL, '/data/image/30/21.jpg'),
+	(31, 'B-0001', 'Buds1', 8, 1.00, 1.00, 'Developer', 10000, NULL, '/data/image/31/6.jpg');
 
 DROP TABLE IF EXISTS `products_image`;
 CREATE TABLE IF NOT EXISTS `products_image` (
@@ -178,18 +210,19 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(100) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `status` tinyint DEFAULT '1',
-  `role_type` enum('admin','employee','standard') DEFAULT NULL,
+  `role_type` enum('admin','employee','standard') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'standard',
   `comment` text,
+  `user_image` text,
   PRIMARY KEY (`idUser`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DELETE FROM `users`;
-INSERT INTO `users` (`idUser`, `username`, `email`, `password`, `status`, `role_type`, `comment`) VALUES
-	(1, 'marc', 'master@localhost', '$2y$10$6Z5vbis0UsP5FvaIWgcpleREMKy3.PsALWVC0imK4Vzlune3oHBA.', 1, 'admin', NULL),
-	(2, 'marc', 'user1@localhost', '$2y$10$GU.wkZ3iXb4PgvlTLFGJce9IDwHxxLLFDa6x6z6Avu2VByp12ztJ2', 1, NULL, NULL),
-	(3, 'marx', 'user1@localhost', '$2y$10$xYeL0.FD0lgJpLimFH9wH.0ineQVuD6wfTobkGCCc4hV938V3Bho6', 1, NULL, NULL),
-	(4, 'marx1', 'marx@marx.com', '$2y$10$p35NZPHzFaFlJpixHj3vvOupZMXVBcIlg1txVtlKKJ9YJsRxAtE7C', 1, NULL, NULL),
-	(6, 'mic', 'mic@mic.com', '$2y$10$fvHsa.b/4fuaACkN3NCpD.CApJnlkm3w5CpaszuGTxP6cFk53l5Ou', 1, 'standard', NULL);
+INSERT INTO `users` (`idUser`, `username`, `email`, `password`, `status`, `role_type`, `comment`, `user_image`) VALUES
+	(1, 'marc', 'master@localhost', '$2y$10$YLzX1VI4HlWail6s1TWv5extNUzo/WrlL5kwlq0/mNU05146nD9KG', 1, 'admin', NULL, '/data/image/user/14.jpg'),
+	(2, 'lester', 'webmaster1@local', '$2y$10$U/ziX5DeqkxqvakL9TeN/.CXrLhU1QhwPI5ugyiUHhchiVWCln8Ti', 1, 'employee', NULL, '/data/image/user/14.jpg'),
+	(6, 'mic', 'mic@localhost', '$2y$10$F3Sq9uLGyVaMXIqQGws5Qu8G5N.F60dKoWvLmcb8NDYBykwPtu37W', 1, 'standard', NULL, '/data/image/user/5.jpg'),
+	(18, 'sir', 'mic@localhost1', '$2y$10$GsCStuZvFzKH3EgwYqfgLeuCDjEmVx/E5PZ1mLZLHbYpMWOSNh146', 1, 'standard', NULL, NULL),
+	(19, 'system32', 'system32@localhost', '$2y$10$uS1z1qBK7t6LGIBdwNd6vuw2guvQCT4qLAtIKY6FgvVEXJ7SkEaDq', 1, 'standard', NULL, NULL);
 
 DROP TRIGGER IF EXISTS `AFTER_INSERT_PRODUCT`;
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
